@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Admin Points Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+        }
+
+        .btn-add {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-add:hover {
+            background-color: #218838;
+        }
+
+        .btn-remove {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-remove:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark bg-dark border-bottom">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="dashboard.html">
+                <img src="./assets/logo.png" alt="Logo" class="logo me-2" style="width: 40px; height: auto;">
+                <span>FantaMotoGP</span>
+            </a>
+            <button class="btn btn-secondary" id="logout">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </button>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Admin Console</h1>
+        <!-- News Publication Section -->
+        <div class="card p-4 mt-5">
+            <h3 class="mb-3">Pubblica</h3>
+            <div class="mb-3">
+                <label for="newsTitle" class="form-label">Titolo</label>
+                <input type="text" class="form-control" id="newsTitle" placeholder="Inserisci il titolo">
+                <div id="title-error" class="text-danger mt-2" style="display: none;">Titolo è obbligatorio</div>
+            </div>
+            <div class="mb-3">
+                <label for="newsRecap" class="form-label">Body</label>
+                <textarea class="form-control" id="newsRecap" rows="3" placeholder="Inserisci un riepilogo"></textarea>
+                <div id="recap-error" class="text-danger mt-2" style="display: none;">Riepilogo è obbligatorio</div>
+            </div>
+            <button class="btn btn-primary" id="publishNewsBtn">Pubblica</button>
+        </div>
+
+        <!-- Toast for Errors -->
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+            <div id="error-toast" class="toast bg-danger text-white" role="alert" aria-live="assertive"
+                aria-atomic="true">
+                <div class="toast-header bg-danger text-white">
+                    <strong class="me-auto">Error</strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+                </div>
+                <div id="toast-error-body" class="toast-body">
+                    Something went wrong.
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Toast -->
+        <div class="toast text-bg-success" id="success-toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-success text-white">
+                <strong class="me-auto">Troppo forte</strong>
+                <small class="text-light">proprio mo</small>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toast-success-body">
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase imports and configuration
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, setDoc, query, where } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlLVyt-XFNbnnwtkpbpO7MbfcEczBFPXM",
+            authDomain: "fantamotogp-e46cd.firebaseapp.com",
+            projectId: "fantamotogp-e46cd",
+            storageBucket: "fantamotogp-e46cd.firebasestorage.app",
+            messagingSenderId: "1082694838160",
+            appId: "1:1082694838160:web:637714386327bcc8027515",
+            measurementId: "G-LSRZLRP39Z"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        async function publishNews() {
+            const newsCollection = collection(db, 'news');
+            const title = document.getElementById('newsTitle').value;
+            const recap = document.getElementById('newsRecap').value;
+
+            // Reset errors
+            document.getElementById('title-error').style.display = 'none';
+            document.getElementById('recap-error').style.display = 'none';
+
+            // Validate inputs
+            if (!title) {
+                document.getElementById('title-error').style.display = 'block';
+                return;
+            }
+            if (!recap) {
+                document.getElementById('recap-error').style.display = 'block';
+                return;
+            }
+
+            try {
+                // Add news to Firestore
+                await setDoc(doc(newsCollection), {
+                    title: title,
+                    recap: recap,
+                    timestamp: new Date()
+                });
+
+                // Show success toast
+                const successToastEl = document.getElementById('success-toast');
+                const successToastBody = document.getElementById('toast-success-body');
+                successToastBody.textContent = `Notizia pubblicata con successo: ${title}`;
+                const successToast = new bootstrap.Toast(successToastEl);
+                successToast.show();
+
+                // Clear the inputs after successful submission
+                document.getElementById('newsTitle').value = '';
+                document.getElementById('newsRecap').value = '';
+
+            } catch (error) {
+                console.error("Error publishing news:", error);
+                const errorToastEl = document.getElementById('error-toast');
+                const errorToastBody = document.getElementById('toast-error-body');
+                errorToastBody.textContent = `Errore nella pubblicazione della notizia.`;
+                const errorToast = new bootstrap.Toast(errorToastEl);
+                errorToast.show();
+            }
+        }
+
+        document.getElementById('publishNewsBtn').addEventListener('click', publishNews);
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Admin Points Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+        }
+
+        .btn-add {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-add:hover {
+            background-color: #218838;
+        }
+
+        .btn-remove {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-remove:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark bg-dark border-bottom">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="dashboard.html">
+                <img src="./assets/logo.png" alt="Logo" class="logo me-2" style="width: 40px; height: auto;">
+                <span>FantaMotoGP</span>
+            </a>
+            <div class="ms-auto d-flex align-items-center gap-2">
+                <button class="btn btn-secondary" id="pubnews">
+                  <i class="fa-solid fa-newspaper"></i> Publish News
+                </button>
+                <button class="btn btn-secondary" id="ranking">
+                    <i class="fa-solid fa-list-ol"></i> Classifica
+                  </button>
+                <button class="btn btn-secondary" id="logout">
+                  <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+              </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Admin Console</h1>
+        
+        <!-- Circuit Selection -->
+        <div class="mb-4">
+            <label for="circuitSelect" class="form-label">Seleziona Circuito</label>
+            <select id="circuitSelect" class="form-select">
+                <option value="" selected disabled>Seleziona un circuito</option>
+                <option value="thailandia" data-date="28 febbraio-2 marzo" data-channel="Sky">Thailandia (28 febbraio-2
+                    marzo) - Sky</option>
+                <option value="argentina" data-date="14-16 marzo" data-channel="Sky">Argentina (14-16 marzo) - Sky
+                </option>
+                <option value="americhe" data-date="28-30 marzo" data-channel="Sky">Americhe (28-30 marzo) - Sky
+                </option>
+                <option value="qatar" data-date="11-13 aprile" data-channel="Sky">Qatar (11-13 aprile) - Sky</option>
+                <option value="spagna" data-date="25-27 aprile" data-channel="Sky">Spagna (25-27 aprile) - Sky</option>
+                <option value="francia" data-date="9-11 maggio" data-channel="Sky">Francia (9-11 maggio) - Sky</option>
+                <option value="gran-bretagna" data-date="23-25 maggio" data-channel="Sky">Gran Bretagna (23-25 maggio) -
+                    Sky</option>
+                <option value="aragon" data-date="5-7 giugno" data-channel="Sky">Aragon (5-7 giugno) - Sky</option>
+                <option value="italia" data-date="20-22 giugno" data-channel="Sky, TV8">Italia (20-22 giugno) - Sky, TV8
+                </option>
+                <option value="olanda" data-date="27-29 giugno" data-channel="Sky">Olanda (27-29 giugno) - Sky</option>
+                <option value="germania" data-date="11-13 luglio" data-channel="Sky">Germania (11-13 luglio) - Sky
+                </option>
+                <option value="repubblica-ceca" data-date="18-20 luglio" data-channel="Sky">Repubblica Ceca (18-20
+                    luglio) - Sky</option>
+                <option value="austria" data-date="15-17 agosto" data-channel="Sky">Austria (15-17 agosto) - Sky
+                </option>
+                <option value="ungheria" data-date="22-24 agosto" data-channel="Sky">Ungheria (22-24 agosto) - Sky
+                </option>
+                <option value="barcellona" data-date="5-7 settembre" data-channel="Sky">Barcellona (5-7 settembre) - Sky
+                </option>
+                <option value="san-marino" data-date="12-14 settembre" data-channel="Sky, TV8">San Marino (12-14
+                    settembre) - Sky, TV8</option>
+                <option value="giappone" data-date="26-28 settembre" data-channel="Sky">Giappone (26-28 settembre) - Sky
+                </option>
+                <option value="indonesia" data-date="3-5 ottobre" data-channel="Sky">Indonesia (3-5 ottobre) - Sky
+                </option>
+                <option value="australia" data-date="17-19 ottobre" data-channel="Sky">Australia (17-19 ottobre) - Sky
+                </option>
+                <option value="malesia" data-date="24-26 ottobre" data-channel="Sky">Malesia (24-26 ottobre) - Sky
+                </option>
+                <option value="portogallo" data-date="7-9 novembre" data-channel="Sky">Portogallo (7-9 novembre) - Sky
+                </option>
+                <option value="valencia" data-date="14-16 novembre" data-channel="Sky">Valencia (14-16 novembre) - Sky
+                </option>
+            </select>
+        </div>
+
+
+        <div class="card p-4">
+            <h3 class="mb-3">Bonus/Malus</h3>
+            <div id="pointsContainer">
+                <!-- Dynamic points rows will be added here -->
+                <div class="row g-3 align-items-end points-entry">
+                    <div class="col-md-3">
+                        <label for="typeSelect_1" class="form-label">Tipo</label>
+                        <select id="typeSelect_1" class="form-select">
+                            <option value="" selected disabled>Seleziona un tipo</option>
+                            <option value="rider">Rider</option>
+                            <option value="team">Team</option>
+                            <option value="constructor">Constructor</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="entitySelect_1" class="form-label">Chi</label>
+                        <select id="entitySelect_1" class="form-select">
+                            <option value="">Seleziona</option>
+                            <!-- Populate dynamically based on Type selection -->
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="pointsInput_1" class="form-label">Punti</label>
+                        <input type="number" id="pointsInput_1" class="form-control" placeholder="Punti">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="commentInput_1" class="form-label">Commento</label>
+                        <input type="text" id="commentInput_1" class="form-control" placeholder="Inserisci un commento">
+                    </div>
+                    <div class="col-md-1">
+                        <button class="btn btn-remove"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-add mt-3" id="addRowBtn"><i class="fa-solid fa-plus"></i> Nuovo </button>
+
+            <div class="mt-4">
+                <button class="btn btn-primary w-100" id="saveBtn">Salva</button>
+            </div>
+        </div>
+    </div>
+    <!-- Save Confirmation Modal -->
+    <div class="modal fade" id="saveModal" tabindex="-1" aria-labelledby="saveModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="saveModalLabel">Confirm Save</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to save the changes?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmSaveBtn">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Toast for Errors -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="error-toast" class="toast bg-danger text-white" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-danger text-white">
+                <strong class="me-auto">Error</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+            </div>
+            <div id="toast-error-body" class="toast-body">
+                Something went wrong.
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Toast -->
+    <div class="toast text-bg-success" id="success-toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-success text-white">
+            <strong class="me-auto">Troppo forte</strong>
+            <small class="text-light">proprio mo</small>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toast-success-body">
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase imports and configuration
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, setDoc, query, where } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlLVyt-XFNbnnwtkpbpO7MbfcEczBFPXM",
+            authDomain: "fantamotogp-e46cd.firebaseapp.com",
+            projectId: "fantamotogp-e46cd",
+            storageBucket: "fantamotogp-e46cd.firebasestorage.app",
+            messagingSenderId: "1082694838160",
+            appId: "1:1082694838160:web:637714386327bcc8027515",
+            measurementId: "G-LSRZLRP39Z"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let entryCount = 1;
+
+        // Function to populate the entity dropdown based on type
+        async function populateEntityOptions(typeSelectId, entitySelectId) {
+            const type = document.getElementById(typeSelectId).value;
+            const entitySelect = document.getElementById(entitySelectId);
+
+            entitySelect.innerHTML = '<option value="">Select Entity</option>'; // Reset entity dropdown
+
+            let snapshot;
+            switch (type) {
+                case "rider":
+                    const ridersCollection = collection(db, 'riders');
+                    const ridersSnapshot = await getDocs(ridersCollection);
+                    if (ridersSnapshot.empty) {
+
+                        const errorToastEl = document.getElementById('error-toast');
+                        const errorToastBody = document.getElementById('toast-error-body');
+                        errorToastBody.textContent = `Errore: no piloti`;
+                        const errorToast = new bootstrap.Toast(errorToastEl);
+                        errorToast.show();
+                        return;
+                    }
+                    snapshot = ridersSnapshot;
+                    break;
+                case "team":
+                    const teamCollection = collection(db, 'Teams');
+                    const teamSnapshot = await getDocs(teamCollection);
+                    if (teamSnapshot.empty) {
+
+                        const errorToastEl = document.getElementById('error-toast');
+                        const errorToastBody = document.getElementById('toast-error-body');
+                        errorToastBody.textContent = `Errore: no team`;
+                        const errorToast = new bootstrap.Toast(errorToastEl);
+                        errorToast.show();
+                        return;
+                    }
+                    snapshot = teamSnapshot;
+                    break;
+                case "constructor":
+                    const constructorCollection = collection(db, 'constructors');
+                    const constructorSnapshot = await getDocs(constructorCollection);
+                    if (constructorSnapshot.empty) {
+
+                        const errorToastEl = document.getElementById('error-toast');
+                        const errorToastBody = document.getElementById('toast-error-body');
+                        errorToastBody.textContent = `Errore: no costruttori`;
+                        const errorToast = new bootstrap.Toast(errorToastEl);
+                        errorToast.show();
+                        return;
+                    }
+                    snapshot = constructorSnapshot;
+                    break;
+            }
+
+            snapshot.forEach(doc => {
+                const option = document.createElement("option");
+                option.value = doc.id;
+                option.textContent = doc.data().name;
+                entitySelect.appendChild(option);
+            });
+        }
+
+        // Function to add new row dynamically
+        function addEntry() {
+            entryCount++;
+            const container = document.getElementById("pointsContainer");
+
+            const entryRow = document.createElement("div");
+            entryRow.className = "row g-3 align-items-end points-entry";
+            entryRow.innerHTML = `
+            <div class="col-md-3">
+                <label for="typeSelect_${entryCount}" class="form-label">Tipo</label>
+                <select id="typeSelect_${entryCount}" class="form-select">
+                    <option value="" selected disabled>Seleziona un tipo</option>
+                    <option value="rider">Rider</option>
+                    <option value="team">Team</option>
+                    <option value="constructor">Constructor</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="entitySelect_${entryCount}" class="form-label">Chi</label>
+                <select id="entitySelect_${entryCount}" class="form-select">
+                    <option value="">Seleziona</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="pointsInput_${entryCount}" class="form-label">Punti</label>
+                <input type="number" id="pointsInput_${entryCount}" class="form-control" placeholder="Punti">
+            </div>
+            <div class="col-md-3">
+                <label for="commentInput_${entryCount}" class="form-label">Commento</label>
+                <input type="text" id="commentInput_${entryCount}" class="form-control" placeholder="Inserisci un commento">
+            </div>
+            <div class="col-md-1">
+                <button class="btn btn-remove"><i class="fa-solid fa-trash"></i></button>
+            </div>
+            `;
+            container.appendChild(entryRow);
+
+            // Add event listener for the new "typeSelect" dropdown
+            const typeSelect = entryRow.querySelector(`#typeSelect_${entryCount}`);
+            typeSelect.addEventListener('change', () => populateEntityOptions(`typeSelect_${entryCount}`, `entitySelect_${entryCount}`));
+
+            // Add event listener for the new "remove" button
+            const removeButton = entryRow.querySelector(".btn-remove");
+            removeButton.addEventListener('click', () => removeEntry(removeButton));
+        }
+
+        // Function to remove an entry row
+        function removeEntry(button) {
+            button.closest(".points-entry").remove();
+        }
+
+        // Function to save entries
+        function saveEntries() {
+            const entries = [];
+            document.querySelectorAll(".points-entry").forEach((entry, index) => {
+                const type = entry.querySelector(`[id^='typeSelect_']`).value;
+                const entity = entry.querySelector(`[id^='entitySelect_']`).value;
+                const points = entry.querySelector(`[id^='pointsInput_']`).value;
+                const comment = entry.querySelector(`[id^='commentInput_']`).value;
+
+                if (type && entity && points) {
+                    entries.push({
+                        type,
+                        entity,
+                        points: parseInt(points),
+                        comment
+                    });
+                } else {
+                    const errorToastEl = document.getElementById('error-toast');
+                    const errorToastBody = document.getElementById('toast-error-body');
+                    errorToastBody.textContent = `Errore: manca qualcosa, controlla bene u fr`;
+                    const errorToast = new bootstrap.Toast(errorToastEl);
+                    errorToast.show();
+                    return
+                }
+
+
+            });
+
+            console.log("Entries saved:", entries);
+        }
+        // Show modal when clicking the Save button
+        document.getElementById('saveBtn').addEventListener('click', () => {
+            const circuitSelect = document.getElementById('circuitSelect');
+
+            // Check if a circuit is selected
+            if (!circuitSelect.value) {
+                const errorToastEl = document.getElementById('error-toast');
+                const errorToastBody = document.getElementById('toast-error-body');
+                errorToastBody.textContent = `Errore: seleziona un circuito`;
+                const errorToast = new bootstrap.Toast(errorToastEl);
+                errorToast.show();
+                return;
+            }
+            // Show the save confirmation modal
+            const saveModal = new bootstrap.Modal(document.getElementById('saveModal'));
+            saveModal.show();
+        });
+
+
+        // Confirm save action
+        document.getElementById('confirmSaveBtn').addEventListener('click', () => {
+            saveEntries();  // Call the function to save entries
+            const saveModal = bootstrap.Modal.getInstance(document.getElementById('saveModal'));
+            saveModal.hide();  // Close the modal after saving
+        });
+
+        // Event listeners for existing elements
+        document.getElementById('addRowBtn').addEventListener('click', addEntry);
+        // Logout
+        document.getElementById('logout').addEventListener('click', () => {
+            signOut(auth)
+                .then(() => {
+                    window.location.href = "index.html"; // Redirect to login page
+                })
+                .catch((error) => console.error("Error logging out:", error));
+        });
+        // Ranking
+        document.getElementById('ranking').addEventListener('click', () => {
+            signOut(auth)
+                .then(() => {
+                    window.location.href = "ranching.html"; // Redirect to ranking page
+                })
+                .catch((error) => console.error("Error logging out:", error));
+        });
+        // News
+        document.getElementById('pubnews').addEventListener('click', () => {
+            signOut(auth)
+                .then(() => {
+                    window.location.href = "newnews.html"; // Redirect to news page
+                })
+                .catch((error) => console.error("Error moving out:", error));
+        });
+        // Initial event listener for the first row (already exists in the HTML)
+        const initialTypeSelect = document.getElementById('typeSelect_1');
+        initialTypeSelect.addEventListener('change', () => populateEntityOptions('typeSelect_1', 'entitySelect_1'));
+
+        // Event delegation for the delete buttons, ensuring it works for dynamically added rows
+        document.getElementById('pointsContainer').addEventListener('click', (event) => {
+            if (event.target.closest(".btn-remove")) {
+                removeEntry(event.target.closest(".btn-remove"));
+            }
+        });
+    </script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

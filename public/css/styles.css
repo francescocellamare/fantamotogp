@@ -1,0 +1,88 @@
+/* Define color variables */
+:root {
+    --primary-color: #D90000; /* Primary Red */
+    --secondary-color: #333333; /* Dark Gray */
+    --surface-color: #FFFFFF; /* White */
+    --accent-color: #0077b6; /* Blue Accent */
+    --light-gray: #f1f1f1; /* Light Gray */
+    --dark-gray: #222222; /* Dark Gray (for text or borders) */
+    --black-color: #000000; /* Black */
+    --highlight-color: #ffde00; /* Yellow Highlight (for buttons or icons) */
+}
+
+/* General Body Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: var(--surface-color);
+    color: var(--secondary-color);
+    margin: 0;
+    padding: 0;
+}
+
+/* Navbar Styles */
+.navbar {
+    background-color: var(--secondary-color);
+    margin-bottom: 2rem;
+    padding: 10px;
+}
+
+.navbar a {
+    color: var(--surface-color);
+    text-decoration: none;
+    font-size: 1.1rem;
+}
+
+.navbar a:hover {
+    color: var(--highlight-color);
+}
+
+/* Container */
+.container {
+    text-align: center;
+    margin-top: 50px;
+}
+
+/* Header */
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: var(--secondary-color); /* Use the secondary color for text */
+}
+
+/* Google Sign-In Button */
+#googleSignIn {
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    color: #fff;
+    background-color: var(--accent-color); /* Use Google Blue */
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+/* Hover Effect for Google Sign-In Button */
+#googleSignIn:hover {
+    background-color: #357ae8; /* Darker Google Blue */
+}
+
+/* Logo */
+.logo {
+    width: 40px;
+    height: auto;
+}
+
+/* Card Footer Styling */
+.card-footer {
+    background-color: var(--light-gray);
+    color: var(--dark-gray);
+    padding: 10px;
+    text-align: center;
+}
+
+#countdown-title {
+    background-color: var(--secondary-color);
+    color: var(--dark-gray);
+    padding: 10px;
+    text-align: center;
+}
+

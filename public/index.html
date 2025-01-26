@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>FantaMotoGP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-dark bg-dark border-bottom">
+    <div class="container-fluid">
+      <a class="navbar-brand d-flex align-items-center" href="#">
+        <img src="./assets/logo.png" alt="Logo" class="logo me-2" style="width: 40px; height: auto;">
+        <span>FantaMotoGP</span>
+      </a>
+    </div>
+  </nav>
+
+  <div class="container d-flex justify-content-center align-items-center" style="height: 100vh; padding: 0 15px;">
+    <div class="row w-100">
+
+      <!-- Login Card -->
+      <div class="card mb-4" style="padding: 20px;">
+        <div class="card-body text-center">
+          <h1 class="card-title mb-4">Benvenuto nel FantaMotoGP</h1>
+          <p class="mb-4 text-secondary">Accedi al team</p>
+          <button id="googleSignIn" class="btn btn-primary btn-lg">Sign in with Google</button>
+        </div>
+      </div>
+
+      <!-- Countdown Card -->
+      <div class="card text-center" style="padding: 20px;">
+        <div class="card-header text-white" id="countdown-title">
+          Countdown to MotoGP 2025
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">MotoGP 2025</h5>
+          <p class="card-text">Oh no, siamo inguaiati con i tempi! L'accesso sarà consentito una settimana prima
+            dell'inizio (2 Marzo 2025)</p>
+        </div>
+        <div class="card-footer text-body-secondary" id="time-remaining">
+          <!-- Days Remaining will appear here -->
+        </div>
+      </div>
+
+      <div class="container mt-4">
+        <!-- Latest News Section -->
+        <div class="card text-center">
+          <div class="card-header text-white" id="news-title">
+            Ultime Notizie
+          </div>
+          <div class="card-body" id="latest-news">
+            <!-- Latest news will appear here -->
+            <p class="card-text">Caricamento...</p>
+          </div>
+          <div class="card-footer text-body-secondary">
+            <a href="all-news.html" class="btn btn-primary btn-lg">Tutte le notizie</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <!-- Error Toast -->
+    <div class="toast text-bg-danger" id="error-toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header bg-danger text-white">
+        <strong class="me-auto">Problemi</strong>
+        <small class="text-light">proprio mo</small>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body" id="toast-error-body">
+      </div>
+    </div>
+
+    <!-- Success Toast -->
+    <div class="toast text-bg-success" id="success-toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header bg-success text-white">
+        <strong class="me-auto">Troppo forte</strong>
+        <small class="text-light">proprio mo</small>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body" id="toast-success-body">
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="text-center text-lg-start bg-body-tertiary text-muted" style="padding-top: 15px;">
+
+    <section class="">
+      <div class="container text-center text-md-start mt-5">
+        <!-- Grid row -->
+        <div class="row mt-3">
+          <!-- Grid column -->
+          <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
+            <!-- Content -->
+            <h6 class="text-uppercase fw-bold mb-4">
+              <i class="fas fa-gem me-3"></i>Sei un ludopatico e senza soldi?
+            </h6>
+            <p>
+              Sei nel posto giusto, siamo qui solo per insultarci a vicenda. Si vince solo la faccia e non si molla fino
+              alla fine. Il primo che abbandona mazzate e chi trova gli Easter Eggs nel sito punti in pi&ugrave;
+            </p>
+          </div>
+          <!-- Grid column -->
+
+          <!-- Grid column -->
+          <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mb-4">
+            <!-- Links -->
+            <h6 class="text-uppercase fw-bold mb-4">
+              TODO
+            </h6>
+            <p>
+              <a href="#!" class="text-reset">Angular</a>
+            </p>
+            <p>
+              <a href="#!" class="text-reset">React</a>
+            </p>
+            <p>
+              <a href="#!" class="text-reset">Vue</a>
+            </p>
+            <p>
+              <a href="#!" class="text-reset">Laravel</a>
+            </p>
+          </div>
+          <!-- Grid column -->
+
+          <!-- Grid column -->
+          <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mb-4">
+            <!-- Links -->
+            <h6 class="text-uppercase fw-bold mb-4">
+              Link
+            </h6>
+            <p>
+              <a href="#!" class="text-reset">Pricing</a>
+            </p>
+            <p>
+              <a href="#!" class="text-reset">Settings</a>
+            </p>
+            <p>
+              <a href="#!" class="text-reset">Orders</a>
+            </p>
+            <p>
+              <a href="#!" class="text-reset">Help</a>
+            </p>
+          </div>
+          <!-- Grid column -->
+
+          <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mb-md-0 mb-4">
+            <h6 class="text-uppercase fw-bold mb-4">Contatti</h6>
+            <p><i class="fas fa-home me-3"></i> Per qualsiasi reclamo non contattare noi</p>
+            <p>
+              <i class="fas fa-envelope me-3"></i>
+              Se proprio dovete contattate fra qui:
+            </p>
+            <p><i class="fas fa-phone me-3"></i> telegram number</p>
+            <p><i class="fas fa-print me-3"></i> whatsapp number</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </footer>
+
+  <!-- Firebase and Login Script -->
+  <script>
+    function calculateDaysUntil(targetDate) {
+      const currentDate = new Date();
+      const target = new Date(targetDate);
+      const timeDiff = target - currentDate;
+      return Math.ceil(timeDiff / (1000 * 3600 * 24));
+    }
+
+    const targetDate = "2025-03-02";
+
+    const daysRemaining = calculateDaysUntil(targetDate);
+
+    document.getElementById("time-remaining").textContent = `${daysRemaining} giorni mancanti`;
+  </script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+    import { getFirestore, doc, collection, query, where, getDocs, addDoc, setDoc, limit, orderBy } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDlLVyt-XFNbnnwtkpbpO7MbfcEczBFPXM",
+      authDomain: "fantamotogp-e46cd.firebaseapp.com",
+      projectId: "fantamotogp-e46cd",
+      storageBucket: "fantamotogp-e46cd.firebasestorage.app",
+      messagingSenderId: "1082694838160",
+      appId: "1:1082694838160:web:637714386327bcc8027515",
+      measurementId: "G-LSRZLRP39Z"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Firebase Firestore function to fetch latest news
+    async function fetchLatestNews() {
+      const db = getFirestore(app);
+      const newsCollection = collection(db, 'news');
+
+      // Query for the latest news based on the timestamp, ordered by the most recent
+      const newsQuery = query(newsCollection, orderBy("timestamp", "desc"), limit(1));
+
+      try {
+        const newsSnapshot = await getDocs(newsQuery);
+
+        if (!newsSnapshot.empty) {
+          // Get the first document (most recent news)
+          const latestNews = newsSnapshot.docs[0].data();
+
+          // Format the timestamp into a readable format
+          const timestamp = latestNews.timestamp ? new Date(latestNews.timestamp.seconds * 1000) : new Date();
+          const humanReadableTimestamp = timestamp.toLocaleString();
+
+          // Set the latest news in the HTML
+          const newsSection = document.getElementById('latest-news');
+          newsSection.innerHTML = `
+        <h5 class="card-title">${latestNews.title}</h5>
+        <p class="card-text">${latestNews.recap}</p>
+        <small class="text-muted">${humanReadableTimestamp}</small>
+      `;
+        } else {
+          document.getElementById('latest-news').innerHTML = '<p class="text-muted">No news available</p>';
+        }
+      } catch (error) {
+        console.error("Error fetching the latest news:", error);
+        document.getElementById('latest-news').innerHTML = '<p class="text-muted">Failed to load news</p>';
+      }
+    }
+
+    // Fetch latest news when the page loads
+    window.onload = fetchLatestNews;
+
+    document.getElementById('googleSignIn').addEventListener('click', () => {
+      console.log("Performing login with Google");
+      const provider = new GoogleAuthProvider();
+
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          const user = result.user;
+          console.log("User signed in:", user.displayName, user.email);
+
+          const db = getFirestore(app);
+
+          // Success Toast
+          const successToastEl = document.getElementById('success-toast');
+          const successToastBody = document.getElementById('toast-success-body');
+          successToastBody.textContent = `Benvenuto ${user.displayName}!`;
+          const successToast = new bootstrap.Toast(successToastEl);
+          successToast.show();
+
+          const usersCollection = collection(db, 'users');
+
+          console.log("Fetching user for uid: ", user.uid)
+          const q = query(usersCollection, where("uid", "==", user.uid));
+
+          getDocs(q)
+            .then((querySnapshot) => {
+              if (!querySnapshot.empty) {
+                querySnapshot.forEach((docSnapshot) => {  // Renamed to docSnapshot for clarity
+                  console.log("User Data:", docSnapshot.data()); // Access data with .data()
+
+                  if (docSnapshot.data().squad != null) {
+                    console.log('Team found');
+                    window.location.href = "dashboard.html";
+                  } else {
+                    console.log('Team not found');
+                    window.location.href = "newteam.html";
+                  }
+
+                });
+              } else {
+                console.log("No user found with this UID.");
+                const userDocRef = doc(usersCollection, user.uid);
+                setDoc(userDocRef, {
+                  uid: user.uid,
+                  nickname: user.displayName || "Default Nickname",
+                  email: user.email || "default@mail.com",
+                  squad: null,
+                  role: "standard"
+                })
+                  .then(() => {
+                    // Success Toast
+                    const successToastEl = document.getElementById('success-toast');
+                    const successToastBody = document.getElementById('toast-success-body');
+                    successToastBody.textContent = `Utente creato con successo!`;
+                    const successToast = new bootstrap.Toast(successToastEl);
+                    successToast.show();
+
+                    window.location.href = "newteam.html";
+                  })
+                  .catch((error) => {
+                    console.error("Error creating new user:", error.message);
+
+                    // Error Toast
+                    const errorToastEl = document.getElementById('error-toast');
+                    const errorToastBody = document.getElementById('toast-error-body');
+                    errorToastBody.textContent = `Errore: ${error.message}`;
+                    const errorToast = new bootstrap.Toast(errorToastEl);
+                    errorToast.show();
+                  });
+              }
+            })
+            .catch((error) => {
+              console.error("Error fetching user data:", error.message);
+
+              // Error Toast
+              const errorToastEl = document.getElementById('error-toast');
+              const errorToastBody = document.getElementById('toast-error-body');
+              errorToastBody.textContent = `Errore: ${error.message}`;
+              const errorToast = new bootstrap.Toast(errorToastEl);
+              errorToast.show();
+            });
+        })
+        .catch((error) => {
+          console.error("Error during sign-in:", error.message);
+
+          // Error Toast
+          const errorToastEl = document.getElementById('error-toast');
+          const errorToastBody = document.getElementById('toast-error-body');
+          errorToastBody.textContent = `Errore: ${error.message}`;
+          const errorToast = new bootstrap.Toast(errorToastEl);
+          errorToast.show();
+        });
+    });
+
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+</body>
+
+
+</html>

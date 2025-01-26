@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Admin Console</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            padding: 30px;
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .btn-action:hover {
+            background-color: #4d4d4d;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark bg-dark border-bottom">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="dashboard.html">
+                <img src="./assets/logo.png" alt="Logo" class="logo me-2" style="width: 40px; height: auto;">
+                <span>FantaMotoGP</span>
+            </a>
+                <button class="btn btn-secondary" id="logout">
+                  <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+        </div>
+    </nav>
+
+    <div class="container mt-5 d-flex justify-content-center">
+        <div class="card w-50">
+            <h3 class="text-center mb-4">Admin Console</h3>
+
+            <button class="btn btn-primary btn-action" id="pubnews">
+                <i class="fa-solid fa-newspaper"></i> Pubblica News
+            </button>
+
+            <button class="btn btn-primary btn-action" id="ranking">
+                <i class="fa-solid fa-list-ol"></i> Carica classifica
+            </button>
+
+            <button class="btn btn-primary btn-action" id="bonusmalus">
+                <i class="fa-solid fa-plus-circle"></i> Carica bonus/malus
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase imports and configuration
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlLVyt-XFNbnnwtkpbpO7MbfcEczBFPXM",
+            authDomain: "fantamotogp-e46cd.firebaseapp.com",
+            projectId: "fantamotogp-e46cd",
+            storageBucket: "fantamotogp-e46cd.firebasestorage.app",
+            messagingSenderId: "1082694838160",
+            appId: "1:1082694838160:web:637714386327bcc8027515",
+            measurementId: "G-LSRZLRP39Z"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Logout
+        document.getElementById('logout').addEventListener('click', () => {
+            signOut(auth)
+                .then(() => {
+                    window.location.href = "index.html"; // Redirect to login page
+                })
+                .catch((error) => console.error("Error logging out:", error));
+        });
+
+        // Ranking
+        document.getElementById('ranking').addEventListener('click', () => {
+            signOut(auth)
+                .then(() => {
+                    window.location.href = "ranching.html"; // Redirect to ranking page
+                })
+                .catch((error) => console.error("Error logging out:", error));
+        });
+
+        // News
+        document.getElementById('pubnews').addEventListener('click', () => {
+            signOut(auth)
+                .then(() => {
+                    window.location.href = "newnews.html"; // Redirect to news page
+                })
+                .catch((error) => console.error("Error moving out:", error));
+        });
+
+        // Bonus malus
+        document.getElementById('bonusmalus').addEventListener('click', () => {
+            signOut(auth)
+                .then(() => {
+                    window.location.href = "bonusmalussus.html"; // Redirect to bonus page
+                })
+                .catch((error) => console.error("Error moving out:", error));
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

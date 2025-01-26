@@ -1,0 +1,467 @@
+<head>
+    <title>Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="./css/styles.css">
+    <style>
+        .team-container, .rider-container {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+            transition: background-color 0.3s ease, border 0.3s ease;
+            cursor: pointer;
+        }
+
+        .team-container:hover, .rider-container:hover {
+            background-color: #f1f1f1;
+            border-color: #bbb;
+        }
+
+        .team-container.selected, .rider-container.selected {
+            background-color: #d4edda;
+            border-color: #28a745;
+        }
+
+        .team-aprilia { color: #FF7F00; }
+        .team-ducati { color: #C8102E; }
+        .team-ktm { color: #FF5400; }
+        .team-yamaha { color: #1E3A8A; }
+        .team-honda { color: #F47C2A; }
+        .team-gresini { color: #0078B0; }
+        .team-pramac { color: #7A7A7A; }
+        .team-tech3 { color: #3D3D3D; }
+        .team-withu { color: #FF4C70; }
+
+        .form-check-input { margin-right: 10px; transform: scale(1.2); }
+        .form-check-label { font-size: 16px; }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-dark bg-dark border-bottom">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="./assets/logo.png" alt="Logo" class="logo me-2" style="width: 40px;">
+                <span>FantaMotoGP</span>
+            </a>
+            <button class="btn btn-secondary" id="logout">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h4>Piloti <span class="badge text-bg-secondary" id="totalRider">-1</span></h4>
+        <h4>Team <span class="badge text-bg-secondary" id="totalTeam">-1</span></h4>
+        <h4>Budget <span class="badge text-bg-secondary" id="budget">-1</span></h4>
+        <form id="teamForm">
+            <div class="card mb-3">
+                <div class="card-header"><h4>Selezione i tuoi piloti</h4></div>
+                <div class="card-body">
+                    <div id="riders" class="mt-3"><h5>Piloti:</h5></div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header"><h4>Scegli la tua squadra</h4></div>
+                <div class="card-body">
+                    <div id="teams" class="mt-3"><h5>Squadre:</h5></div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Confermo</button>
+        </form>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div class="toast text-bg-danger" id="error-toast" role="alert" aria-live="assertive">
+            <div class="toast-header bg-danger text-white">
+                <strong class="me-auto">Problemi</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toast-error-body"></div>
+        </div>
+
+        <div class="toast text-bg-success" id="success-toast" role="alert" aria-live="assertive">
+            <div class="toast-header bg-success text-white">
+                <strong class="me-auto">Troppo forte</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toast-success-body"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Firebase SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlLVyt-XFNbnnwtkpbpO7MbfcEczBFPXM",
+            authDomain: "fantamotogp-e46cd.firebaseapp.com",
+            projectId: "fantamotogp-e46cd",
+            storageBucket: "fantamotogp-e46cd.firebasestorage.app",
+            messagingSenderId: "1082694838160",
+            appId: "1:1082694838160:web:637714386327bcc8027515",
+            measurementId: "G-LSRZLRP39Z"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let budget = 0
+
+        let selectedTeamPrice = 0; // Store the selected team's price
+        let selectedRidersPrice = 0; // Store the total price of selected riders
+
+        document.getElementById('totalRider').innerText = selectedRidersPrice
+        document.getElementById('totalTeam').innerText = selectedTeamPrice
+
+        let selectedTeam = null;
+
+        async function fetchTeams() {
+            const teamsContainer = document.getElementById('teams');
+            teamsContainer.innerHTML = "";
+            try {
+                const teamsSnapshot = await getDocs(collection(db, "Teams"));
+
+                teamsSnapshot.forEach((doc) => {
+                    const team = doc.data();
+                    const teamId = team._id;
+                    const teamName = team.name;
+                    const teamPrice = team.price;
+
+                    const teamDiv = document.createElement('div');
+                    teamDiv.classList.add('team-container');
+                    teamDiv.classList.add('mb-3');
+                    teamDiv.setAttribute('data-team-id', teamId);
+
+                    let teamColorClass = '';
+                    switch (teamName.toLowerCase()) {
+                        case 'aprilia racing':
+                            teamColorClass = 'team-aprilia';
+                            break;
+                        case 'ducati lenovo team':
+                            teamColorClass = 'team-ducati';
+                            break;
+                        case 'red bull ktm factory racing':
+                            teamColorClass = 'team-ktm';
+                            break;
+                        case 'monster energy yamaha motogp':
+                            teamColorClass = 'team-yamaha';
+                            break;
+                        case 'repsol honda team':
+                            teamColorClass = 'team-honda';
+                            break;
+                        case 'gresini racing motogp':
+                            teamColorClass = 'team-gresini';
+                            break;
+                        case 'pramac racing':
+                            teamColorClass = 'team-pramac';
+                            break;
+                        case 'lcr honda':
+                            teamColorClass = 'team-honda';
+                            break;
+                        case 'tech3 ktm factory racing':
+                            teamColorClass = 'team-tech3';
+                            break;
+                        case 'withu yamaha rnf motogp team':
+                            teamColorClass = 'team-withu';
+                            break;
+                        default:
+                            teamColorClass = '';
+                            break;
+                    }
+
+
+                    // Add the color class to the label
+                    teamDiv.innerHTML = `
+                <label class="form-check-label ${teamColorClass}" for="team${teamId}">${teamName} - ${teamPrice}</label>
+            `;
+
+                    teamDiv.addEventListener('click', () => toggleTeamSelection(teamId, teamDiv, teamPrice));
+
+                    teamsContainer.appendChild(teamDiv);
+                });
+
+                const teamElement = document.querySelector(`[data-team-id="${selectedTeam}"]`);
+                if (teamElement) {
+                    teamElement.classList.add('selected');
+                }
+
+            } catch (error) {
+                console.error("Error fetching teams: ", error);
+                showToast("Error fetching teams", "danger");
+            }
+        }
+
+        function toggleTeamSelection(teamId, teamDiv, teamPrice) {
+            if (selectedTeam === teamId) {
+                selectedTeamPrice -= teamPrice
+                budget += teamPrice
+                selectedTeam = null;
+                teamDiv.classList.remove('selected');
+            } else {
+                document.querySelectorAll('.team-container.selected').forEach(div => {
+                    div.classList.remove('selected');
+                });
+                selectedTeam = teamId;
+                selectedTeamPrice += teamPrice
+                budget -= teamPrice
+                teamDiv.classList.add('selected');
+            }
+            document.getElementById('totalTeam').innerText = selectedTeamPrice
+            document.getElementById('budget').innerText = budget
+            console.log("budget: ", budget)
+
+
+            console.log("Selected team:", selectedTeam);
+        }
+
+
+        let selectedRiders = [];
+
+        async function fetchRiders() {
+            const ridersContainer = document.getElementById('riders');
+            ridersContainer.innerHTML = "";
+
+            try {
+                const ridersSnapshot = await getDocs(collection(db, "riders"));
+
+                ridersSnapshot.forEach((doc) => {
+                    const rider = doc.data();
+                    const riderId = rider._id;
+                    const riderName = rider.name;
+                    const riderPrice = rider.price;
+
+                    const riderDiv = document.createElement('div');
+                    riderDiv.classList.add('rider-container', 'mb-3');
+                    riderDiv.setAttribute('data-rider-id', riderId);
+
+                    riderDiv.innerHTML = `
+                <label class="form-check-label" for="rider${riderId}">
+                    ${riderName} - ${riderPrice}
+                </label>
+            `;
+
+                    riderDiv.addEventListener('click', () => toggleSelection(riderId, riderDiv, riderPrice));
+
+                    ridersContainer.appendChild(riderDiv);
+                });
+
+                // Highlight already selected riders
+                selectedRiders.forEach((riderId) => {
+                    const riderElement = document.querySelector(`[data-rider-id="${riderId}"]`);
+                    if (riderElement) {
+                        riderElement.classList.add('selected');
+                    }
+                });
+            } catch (error) {
+                console.error("Error fetching riders: ", error);
+                showToast("Error fetching riders", "danger");
+            }
+        }
+
+
+
+        function toggleSelection(riderId, riderDiv, riderPrice) {
+            console.log("Adding rider: ", riderId)
+            const index = selectedRiders.indexOf(riderId);
+            if (index > -1) {
+                selectedRiders.splice(index, 1);
+                selectedRidersPrice -= riderPrice
+                budget += riderPrice
+                riderDiv.classList.remove('selected');
+            } else {
+                selectedRiders.push(riderId);
+                selectedRidersPrice += riderPrice
+                budget -= riderPrice
+                riderDiv.classList.add('selected');
+            }
+            document.getElementById('totalRider').innerText = selectedRidersPrice
+            document.getElementById('budget').innerText = budget
+            console.log("budget: ", budget)
+            console.log("Selected riders:", selectedRiders);
+        }
+
+
+        function showToast(message, type) {
+            const toastEl = document.getElementById(`${type}-toast`);
+            const toastBody = document.getElementById(`toast-${type}-body`);
+            toastBody.textContent = message;
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        }
+
+        function validateSelection() {
+            if (selectedRiders.length != 4) {
+
+                const errorToastEl = document.getElementById('error-toast');
+                const errorToastBody = document.getElementById('toast-error-body');
+                errorToastBody.textContent = `Errore: almeno 4 piloti`;
+                const errorToast = new bootstrap.Toast(errorToastEl);
+                errorToast.show();
+                return false;
+            }
+            if (budget < 0) {
+
+                const errorToastEl = document.getElementById('error-toast');
+                const errorToastBody = document.getElementById('toast-error-body');
+                errorToastBody.textContent = `Errore: ao datti na calmata a spendere`;
+                const errorToast = new bootstrap.Toast(errorToastEl);
+                errorToast.show();
+                return false;
+            }
+            console.log("Selected riders:", selectedRiders);
+            return true;
+        }
+
+        async function fetchSquad(user) {
+            const budgetContainer = document.getElementById('budget');
+            budgetContainer.innerHTML = budget;
+
+            try {
+                console.log("Fetching team of user: ", user.uid);
+
+
+                const userDocRef = doc(db, "users", user.uid);
+                const userDocSnapshot = await getDoc(userDocRef);
+
+                if (userDocSnapshot.exists()) {
+                    const userData = userDocSnapshot.data();
+                    console.log("Looking for team: ", userData);
+                    const teamId = userData.squad;
+
+                    if (teamId) {
+
+                        const teamDocRef = doc(db, 'squads', teamId);
+                        const teamDocSnapshot = await getDoc(teamDocRef);
+
+                        if (teamDocSnapshot.exists()) {
+                            const teamData = teamDocSnapshot.data();
+                            console.log("Team data:", teamData);
+                            document.getElementById('budget').innerText = teamData.budget;
+                            budget = teamData.budget
+                            selectedRiders = teamData.riders
+                            selectedTeam = teamData.team
+                            return teamData
+                        } else {
+                            console.error("Team not found");
+                        }
+                    } else {
+                        console.error("User does not have a team associated");
+                    }
+                } else {
+                    console.error("User document not found");
+                }
+            } catch (error) {
+                console.error("Error fetching squad: ", error);
+                const errorToastEl = document.getElementById('error-toast');
+                const errorToastBody = document.getElementById('toast-error-body');
+                errorToastBody.textContent = `Errore: ${error.message}`;
+                const errorToast = new bootstrap.Toast(errorToastEl);
+                errorToast.show();
+            }
+        }
+
+        async function updateSquad(user) {
+            const userDocRef = doc(db, "users", user.uid);
+            const userDocSnapshot = await getDoc(userDocRef);
+
+            if (userDocSnapshot.exists()) {
+                const userData = userDocSnapshot.data();
+                console.log("Looking for team: ", userData);
+                const teamId = userData.squad;
+
+                if (teamId) {
+                    const squadDocRef = doc(db, "squads", teamId);
+                    await setDoc(squadDocRef, {
+                        budget: budget,
+                        riders: selectedRiders,
+                        team: selectedTeam
+                    }, { merge: true });
+                }
+            }
+        }
+
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                console.log("User is logged in:", user.uid);
+                const squad = await fetchSquad(user);
+                fetchRiders();
+                fetchTeams();
+
+                if (squad) {
+                    // Update budget
+                    document.getElementById('budget').innerText = squad.budget;
+                    budget = squad.budget;
+
+                    // Mark selected riders
+                    selectedRiders = squad.riders || [];
+                    selectedRiders.forEach((riderId) => {
+                        const riderElement = document.querySelector(`[data-rider-id="${riderId}"]`);
+                        if (riderElement) {
+                            riderElement.classList.add('selected');
+                        }
+                    });
+
+                    // Mark selected team
+                    selectedTeam = squad.team || null;
+                    const teamElement = document.querySelector(`[data-team-id="${selectedTeam}"]`);
+                    if (teamElement) {
+                        teamElement.classList.add('selected');
+                    }
+                }
+                document.getElementById('teamForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+
+                    if (validateSelection() && selectedTeam !== null) {
+                        await updateSquad(user)
+
+                        const successToastEl = document.getElementById('success-toast');
+                        const successToastBody = document.getElementById('toast-success-body');
+                        successToastBody.textContent = `Team creato con successo!`;
+                        const successToast = new bootstrap.Toast(successToastEl);
+                        successToast.show();
+
+                        window.location.href = "dashboard.html";
+                    } else if (selectedTeam === null) {
+                        const errorToastEl = document.getElementById('error-toast');
+                        const errorToastBody = document.getElementById('toast-error-body');
+                        errorToastBody.textContent = `Errore: manca il team`;
+                        const errorToast = new bootstrap.Toast(errorToastEl);
+                        errorToast.show();
+                    }
+                });
+            } else {
+                alert("Not logged in")
+                window.location.href = "index.html"; // Redirect to login page
+            }
+        });
+
+        // Logout handler
+        document.getElementById('logout').addEventListener('click', () => {
+            signOut(auth)
+                .then(() => {
+                    window.location.href = "index.html"; // Redirect to login page
+                })
+                .catch((error) => {
+                    console.error("Error logging out:", error.message);
+                    showToast(`Errore: ${error.message}`, "danger");
+                });
+        });
+    </script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

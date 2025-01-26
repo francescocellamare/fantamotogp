@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Admin Points Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+        }
+
+        .btn-add {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-add:hover {
+            background-color: #218838;
+        }
+
+        .btn-remove {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-remove:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark bg-dark border-bottom">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="dashboard.html">
+                <img src="./assets/logo.png" alt="Logo" class="logo me-2" style="width: 40px; height: auto;">
+                <span>FantaMotoGP</span>
+            </a>
+                <button class="btn btn-secondary" id="logout">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Admin Console</h1>
+
+        <!-- Circuit Selection -->
+        <div class="mb-4">
+            <label for="circuitSelect" class="form-label">Seleziona Circuito</label>
+            <select id="circuitSelect" class="form-select">
+                <option value="" selected disabled>Seleziona un circuito</option>
+                <option value="thailandia" data-date="28 febbraio-2 marzo" data-channel="Sky">Thailandia (28 febbraio-2
+                    marzo) - Sky</option>
+                <option value="argentina" data-date="14-16 marzo" data-channel="Sky">Argentina (14-16 marzo) - Sky
+                </option>
+                <option value="americhe" data-date="28-30 marzo" data-channel="Sky">Americhe (28-30 marzo) - Sky
+                </option>
+                <option value="qatar" data-date="11-13 aprile" data-channel="Sky">Qatar (11-13 aprile) - Sky</option>
+                <option value="spagna" data-date="25-27 aprile" data-channel="Sky">Spagna (25-27 aprile) - Sky</option>
+                <option value="francia" data-date="9-11 maggio" data-channel="Sky">Francia (9-11 maggio) - Sky</option>
+                <option value="gran-bretagna" data-date="23-25 maggio" data-channel="Sky">Gran Bretagna (23-25 maggio) -
+                    Sky</option>
+                <option value="aragon" data-date="5-7 giugno" data-channel="Sky">Aragon (5-7 giugno) - Sky</option>
+                <option value="italia" data-date="20-22 giugno" data-channel="Sky, TV8">Italia (20-22 giugno) - Sky, TV8
+                </option>
+                <option value="olanda" data-date="27-29 giugno" data-channel="Sky">Olanda (27-29 giugno) - Sky</option>
+                <option value="germania" data-date="11-13 luglio" data-channel="Sky">Germania (11-13 luglio) - Sky
+                </option>
+                <option value="repubblica-ceca" data-date="18-20 luglio" data-channel="Sky">Repubblica Ceca (18-20
+                    luglio) - Sky</option>
+                <option value="austria" data-date="15-17 agosto" data-channel="Sky">Austria (15-17 agosto) - Sky
+                </option>
+                <option value="ungheria" data-date="22-24 agosto" data-channel="Sky">Ungheria (22-24 agosto) - Sky
+                </option>
+                <option value="barcellona" data-date="5-7 settembre" data-channel="Sky">Barcellona (5-7 settembre) - Sky
+                </option>
+                <option value="san-marino" data-date="12-14 settembre" data-channel="Sky, TV8">San Marino (12-14
+                    settembre) - Sky, TV8</option>
+                <option value="giappone" data-date="26-28 settembre" data-channel="Sky">Giappone (26-28 settembre) - Sky
+                </option>
+                <option value="indonesia" data-date="3-5 ottobre" data-channel="Sky">Indonesia (3-5 ottobre) - Sky
+                </option>
+                <option value="australia" data-date="17-19 ottobre" data-channel="Sky">Australia (17-19 ottobre) - Sky
+                </option>
+                <option value="malesia" data-date="24-26 ottobre" data-channel="Sky">Malesia (24-26 ottobre) - Sky
+                </option>
+                <option value="portogallo" data-date="7-9 novembre" data-channel="Sky">Portogallo (7-9 novembre) - Sky
+                </option>
+                <option value="valencia" data-date="14-16 novembre" data-channel="Sky">Valencia (14-16 novembre) - Sky
+                </option>
+            </select>
+        </div>
+    </div>
+    <!-- Save Confirmation Modal -->
+    <div class="modal fade" id="saveModal" tabindex="-1" aria-labelledby="saveModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="saveModalLabel">Confirm Save</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to save the changes?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmSaveBtn">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Toast for Errors -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="error-toast" class="toast bg-danger text-white" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-danger text-white">
+                <strong class="me-auto">Error</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+            </div>
+            <div id="toast-error-body" class="toast-body">
+                Something went wrong.
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Toast -->
+    <div class="toast text-bg-success" id="success-toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-success text-white">
+            <strong class="me-auto">Troppo forte</strong>
+            <small class="text-light">proprio mo</small>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toast-success-body">
+        </div>
+    </div>
+
+    <div class="container mt-4">
+        <h2>Ordina la Classifica dei Piloti</h2>
+        <p class="text-muted">Trascina i piloti nella posizione corretta per salvare la classifica.</p>
+        <div class="list-group sortable" id="riders-list">
+            <!-- Dynamically populated list of riders -->
+        </div>
+        <button type="button" class="btn btn-primary mt-3" id="save-ranking">Salva Classifica</button>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+    <script type="module">
+        // Firebase imports and configuration
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, setDoc, query, where } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlLVyt-XFNbnnwtkpbpO7MbfcEczBFPXM",
+            authDomain: "fantamotogp-e46cd.firebaseapp.com",
+            projectId: "fantamotogp-e46cd",
+            storageBucket: "fantamotogp-e46cd.firebasestorage.app",
+            messagingSenderId: "1082694838160",
+            appId: "1:1082694838160:web:637714386327bcc8027515",
+            measurementId: "G-LSRZLRP39Z"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Logout
+        document.getElementById('logout').addEventListener('click', () => {
+            signOut(auth)
+                .then(() => {
+                    window.location.href = "index.html"; // Redirect to login page
+                })
+                .catch((error) => console.error("Error logging out:", error));
+        });
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const ridersList = document.getElementById('riders-list');
+
+            const ridersRef = collection(db, 'riders'); // Adjust your collection name here
+
+            // Helper function to update position dynamically
+            const updatePositions = () => {
+                Array.from(ridersList.children).forEach((item, index) => {
+                    const position = index + 1;
+                    const badge = item.querySelector('.badge');
+                    badge.textContent = `${position}${getOrdinalSuffix(position)}`; // Update badge with position
+                });
+            };
+
+            // Fetch riders from Firestore
+            try {
+                const snapshot = await getDocs(ridersRef);
+                snapshot.forEach(doc => {
+                    const rider = doc.data();
+                    const riderItem = document.createElement('div');
+                    riderItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    riderItem.dataset.id = doc.id; // Store Firestore document ID
+                    riderItem.innerHTML = `
+                <span>${rider.name}</span>
+                <span class="badge bg-secondary">${getOrdinalSuffix(rider.rank || 1)}</span>
+            `;
+                    ridersList.appendChild(riderItem);
+                });
+
+                // Update initial positions
+                updatePositions();
+            } catch (error) {
+                console.error('Error fetching riders:', error);
+            }
+
+            // Make the list sortable
+            new Sortable(ridersList, {
+                animation: 150,
+                onEnd: () => {
+                    updatePositions(); // Update positions on drag-and-drop
+                }
+            });
+
+            // Save reordered ranking
+            document.getElementById('save-ranking').addEventListener('click', async () => {
+                const sortedRiders = Array.from(ridersList.children).map((item, index) => ({
+                    id: item.dataset.id,
+                    position: index + 1 // 1-based ranking
+                }));
+
+                // Save updated ranking to Firestore
+                for (const rider of sortedRiders) {
+                    await ridersRef.doc(rider.id).update({ rank: rider.position });
+                }
+
+                alert('Classifica salvata con successo!');
+            });
+
+            // Helper function for ordinal suffix
+            function getOrdinalSuffix(number) {
+                const j = number % 10,
+                    k = number % 100;
+                if (j === 1 && k !== 11) return `st`;
+                if (j === 2 && k !== 12) return `nd`;
+                if (j === 3 && k !== 13) return `rd`;
+                return `th`;
+            }
+        });
+
+    </script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

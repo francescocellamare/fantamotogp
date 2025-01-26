@@ -1,0 +1,186 @@
+[
+    {
+        "_id": 1,
+        "name": "Francesco Bagnaia",
+        "price": 25,
+        "team": 2,
+        "points": 265,
+        "performance": []
+    },
+    {
+        "_id": 2,
+        "name": "Fabio Quartararo",
+        "price": 22,
+        "team": 4,
+        "points": 248,
+        "performance": []
+    },
+    {
+        "_id": 3,
+        "name": "Enea Bastianini",
+        "price": 20,
+        "team": 2,
+        "points": 219,
+        "performance": []
+    },
+    {
+        "_id": 4,
+        "name": "Aleix Espargaro",
+        "price": 21,
+        "team": 1,
+        "points": 212,
+        "performance": []
+    },
+    {
+        "_id": 5,
+        "name": "Jack Miller",
+        "price": 19,
+        "team": 3,
+        "points": 189,
+        "performance": []
+    },
+    {
+        "_id": 6,
+        "name": "Brad Binder",
+        "price": 18,
+        "team": 3,
+        "points": 170,
+        "performance": []
+    },
+    {
+        "_id": 7,
+        "name": "Johann Zarco",
+        "price": 17,
+        "team": 7,
+        "points": 166,
+        "performance": []
+    },
+    {
+        "_id": 8,
+        "name": "Alex Rins",
+        "price": 18,
+        "team": 8,
+        "points": 162,
+        "performance": []
+    },
+    {
+        "_id": 9,
+        "name": "Jorge Martin",
+        "price": 17,
+        "team": 7,
+        "points": 152,
+        "performance": []
+    },
+    {
+        "_id": 10,
+        "name": "Miguel Oliveira",
+        "price": 16,
+        "team": 10,
+        "points": 149,
+        "performance": []
+    },
+    {
+        "_id": 11,
+        "name": "Maverick Vinales",
+        "price": 15,
+        "team": 1,
+        "points": 139,
+        "performance": []
+    },
+    {
+        "_id": 12,
+        "name": "Luca Marini",
+        "price": 14,
+        "team": null,
+        "points": 120,
+        "performance": []
+    },
+    {
+        "_id": 13,
+        "name": "Marco Bezzecchi",
+        "price": 13,
+        "team": null,
+        "points": 111,
+        "performance": []
+    },
+    {
+        "_id": 14,
+        "name": "Marc Marquez",
+        "price": 12,
+        "team": 5,
+        "points": 100,
+        "performance": []
+    },
+    {
+        "_id": 15,
+        "name": "Takaaki Nakagami",
+        "price": 10,
+        "team": 8,
+        "points": 91,
+        "performance": []
+    },
+    {
+        "_id": 16,
+        "name": "Pol Espargaro",
+        "price": 9,
+        "team": 5,
+        "points": 88,
+        "performance": []
+    },
+    {
+        "_id": 17,
+        "name": "Alex Marquez",
+        "price": 8,
+        "team": 6,
+        "points": 77,
+        "performance": []
+    },
+    {
+        "_id": 18,
+        "name": "Franco Morbidelli",
+        "price": 8,
+        "team": 4,
+        "points": 74,
+        "performance": []
+    },
+    {
+        "_id": 19,
+        "name": "Remy Gardner",
+        "price": 7,
+        "team": 9,
+        "points": 68,
+        "performance": []
+    },
+    {
+        "_id": 20,
+        "name": "Raul Fernandez",
+        "price": 6,
+        "team": 9,
+        "points": 65,
+        "performance": []
+    },
+    {
+        "_id": 21,
+        "name": "Darryn Binder",
+        "price": 5,
+        "team": 10,
+        "points": 58,
+        "performance": []
+    },
+    {
+        "_id": 22,
+        "name": "Fabio Di Giannantonio",
+        "price": 5,
+        "team": 6,
+        "points": 55,
+        "performance": []
+    },
+    {
+        "_id": 23,
+        "name": "Andrea Dovizioso",
+        "price": 4,
+        "team": null,
+        "points": 50,
+        "performance": []
+    }
+]

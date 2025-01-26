@@ -1,0 +1,72 @@
+[
+    {
+        "_id": 1,
+        "name": "Aprilia Racing",
+        "price": 15,
+        "points": 350,
+        "performance": []
+    },
+    {
+        "_id": 2,
+        "name": "Ducati Lenovo Team",
+        "price": 20,
+        "points": 450,
+        "performance": []
+    },
+    {
+        "_id": 3,
+        "name": "Red Bull KTM Factory Racing",
+        "price": 18,
+        "points": 400,
+        "performance": []
+    },
+    {
+        "_id": 4,
+        "name": "Monster Energy Yamaha MotoGP",
+        "price": 17,
+        "points": 360,
+        "performance": []
+    },
+    {
+        "_id": 5,
+        "name": "Repsol Honda Team",
+        "price": 16,
+        "points": 300,
+        "performance": []
+    },
+    {
+        "_id": 6,
+        "name": "Gresini Racing MotoGP",
+        "price": 14,
+        "points": 310,
+        "performance": []
+    },
+    {
+        "_id": 7,
+        "name": "Pramac Racing",
+        "price": 15,
+        "points": 340,
+        "performance": []
+    },
+    {
+        "_id": 8,
+        "name": "LCR Honda",
+        "price": 12,
+        "points": 250,
+        "performance": []
+    },
+    {
+        "_id": 9,
+        "name": "Tech3 KTM Factory Racing",
+        "price": 10,
+        "points": 200,
+        "performance": []
+    },
+    {
+        "_id": 10,
+        "name": "WithU Yamaha RNF MotoGP Team",
+        "price": 11,
+        "points": 210,
+        "performance": []
+    }
+]
