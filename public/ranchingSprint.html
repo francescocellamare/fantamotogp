@@ -107,7 +107,7 @@
     </div>
 
     <div class="container mt-4">
-        <h2>Ordina la Classifica dei Piloti</h2>
+        <h2>Ordina la Classifica Piloti per la sprint</h2>
         <p class="text-muted">Trascina i piloti nella posizione corretta per salvare la classifica.</p>
         <div class="list-group sortable" id="riders-list">
             <!-- Dynamically populated list of riders -->
@@ -312,11 +312,11 @@
                 if (circuitIndex !== -1) {
                     console.log('Circuit found');
                     // If circuit exists, update the score
-                    updatedPerformance[circuitIndex].score = getMotoGPPoints(rider.position);
+                    updatedPerformance[circuitIndex].sprint = getMotoGPPoints(rider.position);
                 } else {
                     console.log('Circuit not found, adding new entry');
                     // If circuit doesn't exist, add a new entry
-                    updatedPerformance.push({ circuit: circuit, score: getMotoGPPoints(rider.position), bonus: 0, sprint: 0 });
+                    updatedPerformance.push({ circuit: circuit, score: 0, bonus: 0, sprint: getMotoGPPoints(rider.position) });
                 }
 
                 // Calculate the sum of all performance scores
@@ -328,9 +328,8 @@
                     points: totalScore // Add the calculated total score
                 });
 
-                // console.log(`Updated ${riderData.name} at ${circuit} with ${getMotoGPPoints(rider.position)} points.`);
-                // console.log(`Total score for ${riderData.name}: ${totalScore}`);
-
+                console.log(`Updated ${riderData.name} at ${circuit} with ${getMotoGPPoints(rider.position)} points.`);
+                console.log(`Total score for ${riderData.name}: ${totalScore}`);
             }
 
             async function updateSquadPoints() {
@@ -371,7 +370,7 @@
                                 console.warn(`Rider with ID ${riderId} not found.`);
                             }
                         }
-
+                        
                         const teamRef = doc(db, 'Teams', squadData.team)
                         const teamSnap = await getDoc(teamRef);
 
@@ -382,6 +381,7 @@
                         } else {
                             console.warn(`Team with ID ${teamId} not found.`);
                         }
+
                         // Define the reference to the squad document to update it
                         const squadRef = doc(db, 'squads', squadDoc.id); // Use the squad's doc id to get the reference
 
@@ -396,9 +396,6 @@
                     console.error("Error updating squad points:", error);
                 }
             }
-
-
-
 
             // Helper function for ordinal suffix
             function getOrdinalSuffix(number) {

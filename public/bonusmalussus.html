@@ -48,65 +48,26 @@
             </a>
             <div class="ms-auto d-flex align-items-center gap-2">
                 <button class="btn btn-secondary" id="pubnews">
-                  <i class="fa-solid fa-newspaper"></i> Publish News
+                    <i class="fa-solid fa-newspaper"></i> Publish News
                 </button>
                 <button class="btn btn-secondary" id="ranking">
                     <i class="fa-solid fa-list-ol"></i> Classifica
-                  </button>
-                <button class="btn btn-secondary" id="logout">
-                  <i class="fa-solid fa-right-from-bracket"></i> Logout
                 </button>
-              </div>
+                <button class="btn btn-secondary" id="logout">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+            </div>
         </div>
     </nav>
 
     <div class="container mt-5">
         <h1 class="text-center mb-4">Admin Console</h1>
-        
+
         <!-- Circuit Selection -->
         <div class="mb-4">
             <label for="circuitSelect" class="form-label">Seleziona Circuito</label>
             <select id="circuitSelect" class="form-select">
-                <option value="" selected disabled>Seleziona un circuito</option>
-                <option value="thailandia" data-date="28 febbraio-2 marzo" data-channel="Sky">Thailandia (28 febbraio-2
-                    marzo) - Sky</option>
-                <option value="argentina" data-date="14-16 marzo" data-channel="Sky">Argentina (14-16 marzo) - Sky
-                </option>
-                <option value="americhe" data-date="28-30 marzo" data-channel="Sky">Americhe (28-30 marzo) - Sky
-                </option>
-                <option value="qatar" data-date="11-13 aprile" data-channel="Sky">Qatar (11-13 aprile) - Sky</option>
-                <option value="spagna" data-date="25-27 aprile" data-channel="Sky">Spagna (25-27 aprile) - Sky</option>
-                <option value="francia" data-date="9-11 maggio" data-channel="Sky">Francia (9-11 maggio) - Sky</option>
-                <option value="gran-bretagna" data-date="23-25 maggio" data-channel="Sky">Gran Bretagna (23-25 maggio) -
-                    Sky</option>
-                <option value="aragon" data-date="5-7 giugno" data-channel="Sky">Aragon (5-7 giugno) - Sky</option>
-                <option value="italia" data-date="20-22 giugno" data-channel="Sky, TV8">Italia (20-22 giugno) - Sky, TV8
-                </option>
-                <option value="olanda" data-date="27-29 giugno" data-channel="Sky">Olanda (27-29 giugno) - Sky</option>
-                <option value="germania" data-date="11-13 luglio" data-channel="Sky">Germania (11-13 luglio) - Sky
-                </option>
-                <option value="repubblica-ceca" data-date="18-20 luglio" data-channel="Sky">Repubblica Ceca (18-20
-                    luglio) - Sky</option>
-                <option value="austria" data-date="15-17 agosto" data-channel="Sky">Austria (15-17 agosto) - Sky
-                </option>
-                <option value="ungheria" data-date="22-24 agosto" data-channel="Sky">Ungheria (22-24 agosto) - Sky
-                </option>
-                <option value="barcellona" data-date="5-7 settembre" data-channel="Sky">Barcellona (5-7 settembre) - Sky
-                </option>
-                <option value="san-marino" data-date="12-14 settembre" data-channel="Sky, TV8">San Marino (12-14
-                    settembre) - Sky, TV8</option>
-                <option value="giappone" data-date="26-28 settembre" data-channel="Sky">Giappone (26-28 settembre) - Sky
-                </option>
-                <option value="indonesia" data-date="3-5 ottobre" data-channel="Sky">Indonesia (3-5 ottobre) - Sky
-                </option>
-                <option value="australia" data-date="17-19 ottobre" data-channel="Sky">Australia (17-19 ottobre) - Sky
-                </option>
-                <option value="malesia" data-date="24-26 ottobre" data-channel="Sky">Malesia (24-26 ottobre) - Sky
-                </option>
-                <option value="portogallo" data-date="7-9 novembre" data-channel="Sky">Portogallo (7-9 novembre) - Sky
-                </option>
-                <option value="valencia" data-date="14-16 novembre" data-channel="Sky">Valencia (14-16 novembre) - Sky
-                </option>
+                <option value="" selected disabled>Seleziona un circuito</option> <!-- This is your placeholder -->
             </select>
         </div>
 
@@ -199,7 +160,7 @@
         // Firebase imports and configuration
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, doc, getDoc, setDoc, query, where } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, setDoc, query, updateDoc, where } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDlLVyt-XFNbnnwtkpbpO7MbfcEczBFPXM",
@@ -218,6 +179,44 @@
 
         let entryCount = 1;
 
+        async function loadRaces() {
+            const circuitSelect = document.getElementById('circuitSelect');
+            const racesRef = collection(db, 'motogp_races');
+            try {
+                const snapshot = await getDocs(racesRef);
+                let races = [];
+
+                snapshot.forEach(doc => {
+                    const race = doc.data();
+                    races.push({
+                        number: parseInt(race.number, 10),
+                        value: race.value,
+                        date: race.date
+                    });
+                });
+
+                // Sort races by number
+                races.sort((a, b) => a.number - b.number);
+
+                // Populate the select element
+                races.forEach(race => {
+                    const option = document.createElement('option');
+                    option.value = race.value;
+                    option.textContent = `${race.number}) ${race.value} - (${race.date})`;
+                    option.setAttribute('data-date', race.date);
+                    option.setAttribute('data-value', race.value);
+                    option.setAttribute('data-num', race.number);
+                    circuitSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error("Error fetching races:", error);
+            }
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadRaces();
+        });
         // Function to populate the entity dropdown based on type
         async function populateEntityOptions(typeSelectId, entitySelectId) {
             const type = document.getElementById(typeSelectId).value;
@@ -330,36 +329,184 @@
             button.closest(".points-entry").remove();
         }
 
-        // Function to save entries
-        function saveEntries() {
-            const entries = [];
-            document.querySelectorAll(".points-entry").forEach((entry, index) => {
-                const type = entry.querySelector(`[id^='typeSelect_']`).value;
-                const entity = entry.querySelector(`[id^='entitySelect_']`).value;
-                const points = entry.querySelector(`[id^='pointsInput_']`).value;
-                const comment = entry.querySelector(`[id^='commentInput_']`).value;
+        async function saveEntries(circuit) {
+            // Select all the rows of points entries
+            const entries = document.querySelectorAll('.points-entry');
 
-                if (type && entity && points) {
-                    entries.push({
-                        type,
-                        entity,
-                        points: parseInt(points),
-                        comment
-                    });
-                } else {
-                    const errorToastEl = document.getElementById('error-toast');
-                    const errorToastBody = document.getElementById('toast-error-body');
-                    errorToastBody.textContent = `Errore: manca qualcosa, controlla bene u fr`;
-                    const errorToast = new bootstrap.Toast(errorToastEl);
-                    errorToast.show();
-                    return
-                }
+            // Convert the NodeList to an array and loop through each entry to extract details
+            const entriesArray = Array.from(entries).map((entry) => {
+                const typeSelect = entry.querySelector('select[id^="typeSelect"]');
+                const entitySelect = entry.querySelector('select[id^="entitySelect"]');
+                const pointsInput = entry.querySelector('input[id^="pointsInput"]');
+                const commentInput = entry.querySelector('input[id^="commentInput"]');
 
+                const type = typeSelect.value;
+                const entity = entitySelect.value;
+                const points = pointsInput.value;
+                const comment = commentInput.value;
 
+                return { type: type, id: entity, bonus: points, comment: comment };
             });
 
-            console.log("Entries saved:", entries);
+            // Loop through the entries and call the updateRiderPoints (or other functions) for each entry
+            for (const item of entriesArray) {
+                switch(item.type) {
+                    case 'rider':
+                        await updateRiderPoints(item.id, circuit, item.bonus, item.comment);
+                        break
+                    case 'team':
+                        await updateTeamPoints(item.id, circuit, item.bonus, item.comment);
+                        break
+                }
+            }
+            await updateSquadPoints()
+
+
+            // You can proceed to save the data in your database or perform any other actions here
         }
+
+
+        async function updateRiderPoints(riderId, circuit, points, comment) {
+            const riderRef = doc(db, "riders", riderId);
+            const riderSnap = await getDoc(riderRef);
+
+            points = parseInt(points)
+            if (!riderSnap.exists()) {
+                console.warn(`Rider with ID ${riderId} not found.`);
+                return;
+            }
+
+            const riderData = riderSnap.data();
+            console.log('Current Rider Data:', riderData);
+
+            let updatedPerformance = [...riderData.performance]; // Copy the performance array
+
+            // Check if the circuit already exists in the performance array
+            const circuitIndex = updatedPerformance.findIndex(perf => perf.circuit === circuit);
+
+            if (circuitIndex !== -1) {
+                updatedPerformance[circuitIndex].bonus += parseInt(points);
+            } else {
+                updatedPerformance.push({ circuit: circuit, score: 0, sprint: 0, bonus: parseInt(points) });
+            }
+
+            console.log(updatedPerformance)
+            // Calculate the total score by adding points and any other bonus fields
+            const totalScore = updatedPerformance.reduce((sum, performance) => sum + performance.score + performance.sprint + performance.bonus, 0);
+
+            // Update Firestore with the new performance and total points
+            await updateDoc(riderRef, {
+                performance: updatedPerformance,
+                points: totalScore // Total score from all races
+            });
+
+            console.log(`Updated rider with ID ${riderId} at circuit ${circuit} with ${points} points.`);
+            console.log(`Total score for rider: ${totalScore}`);
+        }
+
+        async function updateTeamPoints(teamId, circuit, points, comment) {
+            const teamRef = doc(db, "Teams", teamId);
+            const teamSnap = await getDoc(teamRef);
+
+            points = parseInt(points)
+            if (!teamSnap.exists()) {
+                console.warn(`Team with ID ${teamId} not found.`);
+                return;
+            }
+
+            const teamData = teamSnap.data();
+            console.log('Current team Data:', teamData);
+
+            let updatedPerformance = [...teamData.performance]; // Copy the performance array
+
+            // Check if the circuit already exists in the performance array
+            const circuitIndex = updatedPerformance.findIndex(perf => perf.circuit === circuit);
+
+            if (circuitIndex !== -1) {
+                updatedPerformance[circuitIndex].bonus += parseInt(points);
+            } else {
+                updatedPerformance.push({ circuit: circuit, bonus: parseInt(points) });
+            }
+
+            console.log(updatedPerformance)
+            // Calculate the total score by adding points and any other bonus fields
+            const totalScore = updatedPerformance.reduce((sum, performance) => sum + performance.bonus, 0);
+
+            // Update Firestore with the new performance and total points
+            await updateDoc(teamRef, {
+                performance: updatedPerformance,
+                points: totalScore // Total score from all races
+            });
+
+            console.log(`Updated team with ID ${teamId} at circuit ${circuit} with ${points} points.`);
+            console.log(`Total score for team: ${totalScore}`);
+        }
+
+        async function updateSquadPoints() {
+                try {
+                    // Fetch squads collection
+                    const squadCollection = collection(db, 'squads');
+                    const squadSnapshot = await getDocs(squadCollection);
+
+                    // Check if any squads exist
+                    if (squadSnapshot.empty) {
+                        console.error("No squads found.");
+                        return;
+                    }
+
+                    // Iterate over each squad document
+                    for (const squadDoc of squadSnapshot.docs) {
+                        const squadData = squadDoc.data();
+                        console.log(squadData);
+
+                        // Initialize total points with the current squad's points
+                        let totalPoints = squadData.points || 0; // Start with the squad's current points
+
+                        // Fetch the riders array (IDs) associated with this squad
+                        const ridersIds = squadData.riders || [];
+
+                        console.log(`Riders IDs: ${ridersIds}`);
+
+                        // Iterate over each rider ID in the riders array
+                        for (const riderId of ridersIds) {
+                            const riderRef = doc(db, 'riders', riderId.toString());
+                            const riderSnap = await getDoc(riderRef);
+
+                            // If rider exists, add their points to the squad's total
+                            if (riderSnap.exists()) {
+                                const riderData = riderSnap.data();
+                                totalPoints += riderData.points || 0;
+                            } else {
+                                console.warn(`Rider with ID ${riderId} not found.`);
+                            }
+                        }
+
+                        const teamRef = doc(db, 'Teams', squadData.team.toString())
+                        console.log('ajo: ' + squadData.team)
+                        const teamSnap = await getDoc(teamRef);
+
+                        // If rider exists, add their points to the squad's total
+                        if (teamSnap.exists()) {
+                            const teamData = teamSnap.data();
+                            totalPoints += teamData.points || 0;
+                        } else {
+                            console.warn(`Team with ID ${teamId} not found.`);
+                        }
+
+                        // Define the reference to the squad document to update it
+                        const squadRef = doc(db, 'squads', squadDoc.id); // Use the squad's doc id to get the reference
+
+                        // Update the squad with the new total points
+                        await updateDoc(squadRef, {
+                            points: totalPoints
+                        });
+
+                        console.log(`Updated squad '${squadData.name}' with total points: ${totalPoints}`);
+                    }
+                } catch (error) {
+                    console.error("Error updating squad points:", error);
+                }
+            }
         // Show modal when clicking the Save button
         document.getElementById('saveBtn').addEventListener('click', () => {
             const circuitSelect = document.getElementById('circuitSelect');
@@ -381,7 +528,23 @@
 
         // Confirm save action
         document.getElementById('confirmSaveBtn').addEventListener('click', () => {
-            saveEntries();  // Call the function to save entries
+            const selectedCircuitOption = document.getElementById('circuitSelect').selectedOptions[0];
+
+            if (!selectedCircuitOption) {
+                console.error("No circuit selected.");
+                return;
+            }
+
+            // Extract race number (parse it from option text if needed)
+            const circuit = selectedCircuitOption.getAttribute('data-num'); // `race.num`
+
+            if (!circuit) {
+                console.error("Invalid circuit selected.");
+                return;
+            }
+            console.log(`circuit ${circuit}`)
+
+            saveEntries(circuit);
             const saveModal = bootstrap.Modal.getInstance(document.getElementById('saveModal'));
             saveModal.hide();  // Close the modal after saving
         });

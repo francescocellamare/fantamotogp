@@ -57,6 +57,10 @@
                 <i class="fa-solid fa-list-ol"></i> Carica classifica
             </button>
 
+            <button class="btn btn-primary btn-action" id="rankingspring">
+                <i class="fa-solid fa-list-ol"></i> Carica classifica sprint
+            </button>
+
             <button class="btn btn-primary btn-action" id="bonusmalus">
                 <i class="fa-solid fa-plus-circle"></i> Carica bonus/malus
             </button>
@@ -96,6 +100,15 @@
             signOut(auth)
                 .then(() => {
                     window.location.href = "ranching.html"; // Redirect to ranking page
+                })
+                .catch((error) => console.error("Error logging out:", error));
+        });
+
+        // Ranking spring
+        document.getElementById('rankingspring').addEventListener('click', () => {
+            signOut(auth)
+                .then(() => {
+                    window.location.href = "ranchingSprint.html"; // Redirect to ranking page
                 })
                 .catch((error) => console.error("Error logging out:", error));
         });

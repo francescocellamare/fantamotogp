@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Riders</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Include Chart.js -->
+    <link rel="stylesheet" href="./css/styles.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .navbar {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+        }
+
+        #edit {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+        }
+
+        #edit:hover {
+            background-color: #0056b3;
+            color: #fff;
+        }
+
+        .list-group-item {
+            border: none;
+        }
+
+        .list-group-item:nth-child(even) {
+            background-color: #f1f3f5;
+        }
+
+        .list-group-item:nth-child(odd) {
+            background-color: #e9ecef;
+        }
+
+        #breaking-news-bar {
+            position: relative;
+            background-color: #343a40;
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        #newsTicker {
+            white-space: nowrap;
+            overflow: hidden;
+            display: inline-block;
+            animation: scrollNews 15s linear infinite;
+        }
+
+        .card-deck {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .card {
+            width: 18rem;
+        }
+
+        .sort-container {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark bg-dark border-bottom py-3">
+        <div class="container-fluid d-flex align-items-center">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="./assets/logo.png" alt="Logo" class="logo me-2" style="width: 40px; height: auto;">
+                <span class="fw-bold text-white">FantaMotoGP</span>
+            </a>
+            <div class="ms-auto d-flex align-items-center gap-2">
+                <button class="btn btn-secondary d-none" id="console">
+                    <i class="fa-solid fa-tools"></i> Console
+                </button>
+                <button class="btn btn-secondary" id="logout">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+
+    <div class="container mt-5">
+        <!-- Sorting controls -->
+        <div class="sort-container">
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="sortDropdown"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    Sort By
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="sortDropdown">
+                    <li><a class="dropdown-item" href="#" id="sortByName">Name</a></li>
+                    <li><a class="dropdown-item" href="#" id="sortByPoints">Points</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="rider-info" class="text-center">
+            <h2>Loading rider(s)...</h2>
+        </div>
+
+        <!-- Table Container (will be displayed on mobile) -->
+        <div id="table-container" class="mt-4" style="display: none;">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Race</th>
+                        <th>Score Points</th>
+                        <th>Sprint Points</th>
+                        <th>Bonus Points</th>
+                        <th>Total Points</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Data will be injected here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Chart Containers (will be displayed on desktop) -->
+        <div id="bar-chart-container" class="mt-4" style="display: none;">
+            <canvas id="barChart" width="400" height="200"></canvas>
+        </div>
+        <div id="line-chart-container" class="mt-4" style="display: none;">
+            <canvas id="lineChart" width="400" height="200"></canvas>
+        </div>
+
+        <div id="bar-chart-container" class="mt-4" style="display: none;">
+            <canvas id="barChart" width="400" height="200"></canvas>
+        </div>
+
+        <div id="line-chart-container" class="mt-4" style="display: none;">
+            <canvas id="lineChart" width="400" height="200"></canvas>
+        </div>
+
+    </div>
+
+    <script type="module">
+        // Import Firebase SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlLVyt-XFNbnnwtkpbpO7MbfcEczBFPXM",
+            authDomain: "fantamotogp-e46cd.firebaseapp.com",
+            projectId: "fantamotogp-e46cd",
+            storageBucket: "fantamotogp-e46cd.firebasestorage.app",
+            messagingSenderId: "1082694838160",
+            appId: "1:1082694838160:web:637714386327bcc8027515"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Get rider ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const riderId = urlParams.get("id");
+
+        async function fetchRider(riderId) {
+            const riderRef = doc(db, "riders", riderId);
+            const riderSnap = await getDoc(riderRef);
+
+            if (!riderSnap.exists()) {
+                document.getElementById("rider-info").innerHTML = "<h3>Rider not found.</h3>";
+                return;
+            }
+
+            const rider = riderSnap.data();
+            console.log(rider.performance)
+            let teamName = "Unknown Team";
+            if (rider.team) {
+                const teamRef = doc(db, "Teams", rider.team.toString());
+                const teamSnap = await getDoc(teamRef);
+                if (teamSnap.exists()) {
+                    teamName = teamSnap.data().name || "Unknown Team";
+                }
+            }
+
+            document.getElementById("rider-info").innerHTML = `
+                <div class="card mx-auto" style="width: 24rem;">
+                    <img src="${rider.image || 'https://via.placeholder.com/150'}" class="card-img-top" alt="${rider.name}">
+                    <div class="card-body">
+                        <h4 class="card-title">${rider.name}</h4>
+                        <p class="card-text">🏍 Team: <strong>${teamName}</strong></p>
+                        <p class="card-text">⭐ Punti: <strong>${rider.points || 0}</strong></p>
+                    </div>
+                </div>
+            `;
+
+            // Example of creating a chart with rider's data (use your own data for real application)
+            createCharts(rider.performance || 0);
+        }
+
+        function createCharts(points) {
+            const barCtx = document.getElementById('barChart').getContext('2d');
+            const lineCtx = document.getElementById('lineChart').getContext('2d');
+            const tableBody = document.getElementById('table-body');
+
+            const labels = Array.from({ length: 22 }, (_, i) => `Race ${i + 1}`);
+
+            // Arrays to hold values for score, sprint, bonus, and total
+            const scorePoints = new Array(22).fill(0);
+            const sprintPoints = new Array(22).fill(0);
+            const bonusPoints = new Array(22).fill(0);
+            const totalPoints = new Array(22).fill(0);
+
+            points.forEach((item, index) => {
+                if (index < 22) {
+                    scorePoints[index] = item.score || 0;
+                    sprintPoints[index] = item.sprint || 0;
+                    bonusPoints[index] = item.bonus || 0;
+                    totalPoints[index] = item.score + item.sprint + item.bonus;
+                }
+            });
+
+            // Insert data into table for mobile view
+            if (window.innerWidth <= 768) {
+                tableBody.innerHTML = ''; // Clear the table
+                labels.forEach((label, index) => {
+                    tableBody.innerHTML += `
+                <tr>
+                    <td>${label}</td>
+                    <td>${scorePoints[index]}</td>
+                    <td>${sprintPoints[index]}</td>
+                    <td>${bonusPoints[index]}</td>
+                    <td>${totalPoints[index]}</td>
+                </tr>
+            `;
+                });
+                document.getElementById('table-container').style.display = 'block'; // Show table
+                document.getElementById('bar-chart-container').style.display = 'none'; // Hide bar chart
+                document.getElementById('line-chart-container').style.display = 'none'; // Hide line chart
+            } else {
+                // Bar chart data
+                const barData = {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Score Points',
+                            data: scorePoints,
+                            backgroundColor: 'rgba(255, 99, 132, 0.5)',  // Change to your desired color
+                            borderColor: 'rgba(255, 99, 132, 1)',        // Change to your desired color
+                            borderWidth: 1,
+                        },
+                        {
+                            label: 'Sprint Points',
+                            data: sprintPoints,
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)',  // Change to your desired color
+                            borderColor: 'rgba(54, 162, 235, 1)',        // Change to your desired color
+                            borderWidth: 1,
+                        },
+                        {
+                            label: 'Bonus Points',
+                            data: bonusPoints,
+                            backgroundColor: 'rgba(75, 192, 192, 0.5)',  // Change to your desired color
+                            borderColor: 'rgba(75, 192, 192, 1)',        // Change to your desired color
+                            borderWidth: 1,
+                        }
+                    ]
+                };
+
+                // Line chart data
+                const lineData = {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Total Points',
+                            data: totalPoints,
+                            backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                            borderColor: 'rgba(153, 102, 255, 1)',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.1,
+                            type: 'line',
+                        }
+                    ]
+                };
+
+                // Bar chart configuration
+                const barConfig = {
+                    type: 'bar',
+                    data: barData,
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                };
+
+                // Line chart configuration
+                const lineConfig = {
+                    type: 'line',
+                    data: lineData,
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                };
+
+                // Show chart containers on desktop
+                document.getElementById('bar-chart-container').style.display = 'block';
+                document.getElementById('line-chart-container').style.display = 'block';
+                document.getElementById('table-container').style.display = 'none'; // Hide table
+
+                // Create both charts
+                const barChart = new Chart(barCtx, barConfig);
+                const lineChart = new Chart(lineCtx, lineConfig);
+            }
+        }
+
+        // Check window size and re-render charts/table when resizing the screen
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 768) {
+                document.getElementById('bar-chart-container').style.display = 'none';
+                document.getElementById('line-chart-container').style.display = 'none';
+                document.getElementById('table-container').style.display = 'block';
+            } else {
+                document.getElementById('bar-chart-container').style.display = 'block';
+                document.getElementById('line-chart-container').style.display = 'block';
+                document.getElementById('table-container').style.display = 'none';
+            }
+        });
+
+        let riders = [];
+        async function fetchAllRiders() {
+            const ridersRef = collection(db, "riders");
+            const ridersSnap = await getDocs(ridersRef);
+            riders = [];
+            // Use for...of loop to handle async operations properly
+            for (const docSnap of ridersSnap.docs) {
+                const rider = docSnap.data();
+                let teamName = "Unknown Team";
+                if (rider.team) {
+                    const teamRef = doc(db, "Teams", rider.team.toString());
+                    const teamSnap = await getDoc(teamRef);
+                    if (teamSnap.exists()) {
+                        teamName = teamSnap.data().name || "Unknown Team";
+                    }
+                }
+                riders.push({
+                    id: docSnap.id,
+                    name: rider.name,
+                    points: rider.points || 0,
+                    team: teamName,
+                    image: rider.image || 'https://via.placeholder.com/150'
+                });
+            }
+
+            renderRiders(riders);
+        }
+
+        function renderRiders(riders) {
+            const riderInfoContainer = document.getElementById("rider-info");
+            let content = `<div class="card-deck">`;
+            riders.forEach((rider) => {
+                content += `
+                    <div class="card rider-card" data-id="${rider.id}" style="width: 18rem; cursor: pointer;">
+                        <img src="${rider.image}" class="card-img-top" alt="${rider.name}">
+                        <div class="card-body">
+                            <h4 class="card-title">${rider.name}</h4>
+                            <p class="card-text">🏍 Team: <strong>${rider.team}</strong></p>
+                            <p class="card-text">⭐ Punti: <strong>${rider.points}</strong></p>
+                        </div>
+                    </div>
+                `;
+            });
+            content += `</div>`;
+            riderInfoContainer.innerHTML = content;
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            // Use event delegation for rider cards
+            const riderInfoContainer = document.getElementById("rider-info");
+
+            riderInfoContainer.addEventListener("click", (event) => {
+                const card = event.target.closest(".rider-card");
+                if (card) {
+                    const riderId = card.getAttribute("data-id");
+                    const url = new URL(window.location);
+                    url.searchParams.set("id", riderId);
+                    window.location.href = url.toString();  // Reload the page with the new rider ID in the URL
+                }
+            });
+
+            document.getElementById("sortByName").addEventListener("click", () => {
+                riders.sort((a, b) => a.name.localeCompare(b.name));
+                renderRiders(riders);
+            });
+
+            document.getElementById("sortByPoints").addEventListener("click", () => {
+                riders.sort((a, b) => b.points - a.points);
+                renderRiders(riders);
+            });
+        });
+
+        if (riderId) {
+            fetchRider(riderId);
+        } else {
+            fetchAllRiders();
+        }
+
+        // Logout
+        document.getElementById('logout').addEventListener('click', () => {
+            signOut(auth)
+                .then(() => {
+                    window.location.href = "index.html"; // Redirect to login page
+                })
+                .catch((error) => console.error("Error logging out:", error));
+        });
+
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
