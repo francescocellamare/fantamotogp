@@ -33,44 +33,50 @@
 
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-dark bg-dark border-bottom">
-        <div class="container-fluid">
+    <nav class="navbar navbar-dark bg-dark border-bottom py-3">
+        <div class="container-fluid d-flex align-items-center">
             <a class="navbar-brand d-flex align-items-center" href="dashboard.html">
                 <img src="./assets/logo.png" alt="Logo" class="logo me-2" style="width: 40px; height: auto;">
-                <span>FantaMotoGP</span>
+                <span class="fw-bold text-white">FantaMotoGP</span>
             </a>
+            <div class="ms-auto d-flex align-items-center gap-2">
                 <button class="btn btn-secondary" id="logout">
-                  <i class="fa-solid fa-right-from-bracket"></i> Logout
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
                 </button>
+            </div>
         </div>
     </nav>
-
     <div class="container mt-5 d-flex justify-content-center">
-        <div class="card w-50">
+        <div class="card w-100 w-md-50">
             <h3 class="text-center mb-4">Admin Console</h3>
-
-            <button class="btn btn-primary btn-action" id="pubnews">
+    
+            <button class="btn btn-primary btn-action w-100 mb-2" id="pubnews">
                 <i class="fa-solid fa-newspaper"></i> Pubblica News
             </button>
-
-            <button class="btn btn-primary btn-action" id="ranking">
+    
+            <button class="btn btn-primary btn-action w-100 mb-2" id="ranking">
                 <i class="fa-solid fa-list-ol"></i> Carica classifica
             </button>
-
-            <button class="btn btn-primary btn-action" id="rankingspring">
+    
+            <button class="btn btn-primary btn-action w-100 mb-2" id="rankingspring">
                 <i class="fa-solid fa-list-ol"></i> Carica classifica sprint
             </button>
-
-            <button class="btn btn-primary btn-action" id="bonusmalus">
+    
+            <button class="btn btn-primary btn-action w-100 mb-2" id="bonusmalus">
                 <i class="fa-solid fa-plus-circle"></i> Carica bonus/malus
+            </button>
+
+            <button class="btn btn-primary btn-action w-100 mb-2" id="schedina">
+                <i class="fa-solid fa-plus-circle"></i> Calcola schedina
             </button>
         </div>
     </div>
+    
 
     <script type="module">
         // Firebase imports and configuration
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDlLVyt-XFNbnnwtkpbpO7MbfcEczBFPXM",
@@ -86,6 +92,11 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = "index.html";
+            }
+        })
         // Logout
         document.getElementById('logout').addEventListener('click', () => {
             signOut(auth)
@@ -118,6 +129,15 @@
             signOut(auth)
                 .then(() => {
                     window.location.href = "newnews.html"; // Redirect to news page
+                })
+                .catch((error) => console.error("Error moving out:", error));
+        });
+
+        // Schedina
+        document.getElementById('schedina').addEventListener('click', () => {
+            signOut(auth)
+                .then(() => {
+                    window.location.href = "calcolaschedina.html"; // Redirect to schedina page
                 })
                 .catch((error) => console.error("Error moving out:", error));
         });

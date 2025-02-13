@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shop Page</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-dark bg-dark border-bottom py-3">
+    <div class="container-fluid d-flex align-items-center">
+      <a class="navbar-brand d-flex align-items-center" href="#" id="egg1">
+        <img src="./assets/logo.png" alt="Logo" class="logo me-2" style="width: 40px; height: auto;">
+        <span class="fw-bold text-white">FantaMotoGP</span>
+      </a>
+      <div class="ms-auto d-flex align-items-center gap-2">
+        <button class="btn btn-secondary d-none" id="console">
+          <i class="fa-solid fa-tools"></i> Console
+        </button>
+        <button class="btn btn-secondary" id="logout">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </button>
+      </div>
+    </div>
+  </nav>
+  <div class="container mt-5">
+    <h2>Acquista un Messaggio</h2>
+    <p>Crediti disponibili: <span id="credits">0</span></p>
+    <input type="text" id="messageInput" class="form-control mb-3" placeholder="Scrivi il tuo messaggio...">
+    <button class="btn btn-primary" id="buy">Acquista per 2 crediti</button>
+  </div>
+
+    <!-- Toast for Errors -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="error-toast" class="toast bg-danger text-white" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="toast-header bg-danger text-white">
+            <strong class="me-auto">Error</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div id="toast-error-body" class="toast-body">
+            Something went wrong.
+          </div>
+        </div>
+      </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDlLVyt-XFNbnnwtkpbpO7MbfcEczBFPXM",
+      authDomain: "fantamotogp-e46cd.firebaseapp.com",
+      projectId: "fantamotogp-e46cd",
+      storageBucket: "fantamotogp-e46cd.firebasestorage.app",
+      messagingSenderId: "1082694838160",
+      appId: "1:1082694838160:web:637714386327bcc8027515",
+      measurementId: "G-LSRZLRP39Z"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let userData = null;
+
+    document.getElementById('buy').addEventListener('click', () => {
+        buyAwait()
+        console.log('fatto')
+    })
+
+    async function buyAwait() {
+        console.log("comprando")
+        await buyMessage()
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        const userDocSnapshot = await getDoc(userDocRef);
+        if (userDocSnapshot.exists()) {
+          userData = userDocSnapshot.data();
+          document.getElementById("credits").textContent = userData.points || 0;
+        }
+      }
+    });
+
+    async function buyMessage() {
+      const message = auth.currentUser.displayName + ': ' + document.getElementById("messageInput").value;
+      const price = 2;
+
+      if (!userData || userData.points < price) {
+        const errorToastEl = document.getElementById('error-toast');
+        const errorToastBody = document.getElementById('toast-error-body');
+        errorToastBody.textContent = "Stai con le pezze al culo, non puoi pagare";
+        const errorToast = new bootstrap.Toast(errorToastEl);
+        errorToast.show();
+        return;
+      }
+
+      const newCredits = userData.points - price;
+      await setDoc(doc(db, "users", auth.currentUser.uid), { points: newCredits }, { merge: true });
+      await setDoc(doc(db, "messaggio", "id1"), { text: message });
+
+      document.getElementById("credits").textContent = newCredits;
+      alert("Messaggio acquistato con successo!");
+    }
+  </script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+crossorigin="anonymous"></script>
+</body>
+
+</html>

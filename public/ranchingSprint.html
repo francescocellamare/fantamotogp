@@ -40,18 +40,19 @@
 
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-dark bg-dark border-bottom">
-        <div class="container-fluid">
+    <nav class="navbar navbar-dark bg-dark border-bottom py-3">
+        <div class="container-fluid d-flex align-items-center">
             <a class="navbar-brand d-flex align-items-center" href="dashboard.html">
                 <img src="./assets/logo.png" alt="Logo" class="logo me-2" style="width: 40px; height: auto;">
-                <span>FantaMotoGP</span>
+                <span class="fw-bold text-white">FantaMotoGP</span>
             </a>
-            <button class="btn btn-secondary" id="logout">
-                <i class="fa-solid fa-right-from-bracket"></i> Logout
-            </button>
+            <div class="ms-auto d-flex align-items-center gap-2">
+                <button class="btn btn-secondary" id="logout">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+            </div>
         </div>
     </nav>
-
     <div class="container mt-5">
         <h1 class="text-center mb-4">Admin Console</h1>
 
@@ -137,6 +138,11 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = "index.html";
+            }
+        })
         // Logout
         document.getElementById('logout').addEventListener('click', () => {
             signOut(auth)

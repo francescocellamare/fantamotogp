@@ -7,30 +7,76 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   <link rel="stylesheet" href="./css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: none; /* Hidden by default */
+        justify-content: center;
+        align-items: center;
+        z-index: 1050;
+    }
+    .call-card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    }
+</style>
 </head>
 
 <body>
-  <!-- Navbar -->
-  <nav class="navbar navbar-dark bg-dark border-bottom">
-    <div class="container-fluid">
-      <a class="navbar-brand d-flex align-items-center" href="#">
-        <img src="./assets/logo.png" alt="Logo" class="logo me-2" style="width: 40px; height: auto;">
-        <span>FantaMotoGP</span>
-      </a>
+<nav class="navbar navbar-dark bg-dark border-bottom py-3">
+  <div class="container-fluid d-flex align-items-center">
+    <a class="navbar-brand d-flex align-items-center" href="#">
+      <img src="./assets/logo.png" alt="Logo" class="logo me-2" style="width: 40px; height: auto;">
+      <span class="fw-bold text-white">FantaMotoGP</span>
+    </a>
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <button class="btn btn-secondary d-none" id="console">
+        <i class="fa-solid fa-tools"></i> Console
+      </button>
+      <button class="btn btn-secondary" id="logout">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+      </button>
     </div>
-  </nav>
+  </div>
+</nav>
 
   <div class="container d-flex justify-content-center align-items-center" style="height: 100vh; padding: 0 15px;">
     <div class="row w-100">
-
       <!-- Login Card -->
       <div class="card mb-4" style="padding: 20px;">
         <div class="card-body text-center">
           <h1 class="card-title mb-4">Benvenuto nel FantaMotoGP</h1>
           <p class="mb-4 text-secondary">Accedi al team</p>
-          <button id="googleSignIn" class="btn btn-primary btn-lg">Sign in with Google</button>
+          <button id="googleSignIn" class="btn btn-primary btn-lg">
+            <i class="fab fa-google me-2"></i> Login con Google
+          </button>
+
+          <!-- Small text at the bottom -->
+          <p class="mt-4 text-muted small" style="font-size: 0.8rem;">No, non abbiamo altri metodi quindi attaccati</p>
         </div>
       </div>
+
+      <audio id="callAudio" src="./assets/shimbalaie.mp4" preload="auto"></audio>
+      <!-- Fullscreen Overlay -->
+      <div id="callOverlay" class="overlay">
+        <div class="call-card">
+            <h3>📞 Chiamando u Fra...</h3>
+            <p id="callStatus">Nattemo...</p>
+            <button id="endCall" class="btn btn-danger mt-3">Chiudi la chiamata</button>
+        </div>
+
+    </div>
 
       <!-- Countdown Card -->
       <div class="card text-center" style="padding: 20px;">
@@ -102,66 +148,20 @@
           <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
             <!-- Content -->
             <h6 class="text-uppercase fw-bold mb-4">
-              <i class="fas fa-gem me-3"></i>Sei un ludopatico e senza soldi?
+              Sei un ludopatico e senza soldi?
             </h6>
             <p>
               Sei nel posto giusto, siamo qui solo per insultarci a vicenda. Si vince solo la faccia e non si molla fino
               alla fine. Il primo che abbandona mazzate e chi trova gli Easter Eggs nel sito punti in pi&ugrave;
             </p>
           </div>
-          <!-- Grid column -->
 
-          <!-- Grid column -->
-          <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mb-4">
-            <!-- Links -->
-            <h6 class="text-uppercase fw-bold mb-4">
-              TODO
-            </h6>
-            <p>
-              <a href="#!" class="text-reset">Angular</a>
-            </p>
-            <p>
-              <a href="#!" class="text-reset">React</a>
-            </p>
-            <p>
-              <a href="#!" class="text-reset">Vue</a>
-            </p>
-            <p>
-              <a href="#!" class="text-reset">Laravel</a>
-            </p>
-          </div>
-          <!-- Grid column -->
-
-          <!-- Grid column -->
-          <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mb-4">
-            <!-- Links -->
-            <h6 class="text-uppercase fw-bold mb-4">
-              Link
-            </h6>
-            <p>
-              <a href="#!" class="text-reset">Pricing</a>
-            </p>
-            <p>
-              <a href="#!" class="text-reset">Settings</a>
-            </p>
-            <p>
-              <a href="#!" class="text-reset">Orders</a>
-            </p>
-            <p>
-              <a href="#!" class="text-reset">Help</a>
-            </p>
-          </div>
-          <!-- Grid column -->
 
           <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mb-md-0 mb-4">
             <h6 class="text-uppercase fw-bold mb-4">Contatti</h6>
-            <p><i class="fas fa-home me-3"></i> Per qualsiasi reclamo non contattare noi</p>
-            <p>
-              <i class="fas fa-envelope me-3"></i>
-              Se proprio dovete contattate fra qui:
-            </p>
-            <p><i class="fas fa-phone me-3"></i> telegram number</p>
-            <p><i class="fas fa-print me-3"></i> whatsapp number</p>
+            <p>Per qualsiasi reclamo non contattare noi</p>
+            <p>Se proprio dovete, contattate Fra</p>
+            <button class="btn btn-secondary" id="egg1"> Contatta </button>
           </div>
         </div>
       </div>
@@ -169,6 +169,45 @@
 
   </footer>
 
+  <script>
+    document.getElementById('egg1').addEventListener('click', () => {
+        const overlay = document.getElementById('callOverlay');
+        const statusText = document.getElementById('callStatus');
+        const audio = document.getElementById('callAudio');
+        audio.play();  // Play the song
+        overlay.style.display = 'flex';  // Show overlay
+        statusText.innerText = "Nattemo...";
+        setTimeout(() => {
+            statusText.innerText = "Squilla eh, alza il volume...  📲";
+        }, 3000);
+
+        setTimeout(() => {
+            statusText.innerText = "Stu strunz non risponde... 📲";
+        }, 6000);
+
+        setTimeout(() => {
+            statusText.innerText = "Mannaggia a crist... 📲";
+        }, 9000);
+
+        setTimeout(() => {
+            statusText.innerText = "Appo, il Fra risponderà dall'Albania 📲";
+        }, 12000);
+
+        setTimeout(() => {
+            statusText.innerText = "Fra: 'SHIMBALAIE?'";
+        }, 16000);
+    });
+
+    document.getElementById('endCall').addEventListener('click', () => {
+      const overlay = document.getElementById('callOverlay');
+        const audio = document.getElementById('callAudio');
+
+        // Hide overlay and stop audio
+        overlay.style.display = 'none';  
+        audio.pause();  // Stop the song
+        audio.currentTime = 0; // Reset the song to the start    
+    });
+</script>
   <!-- Firebase and Login Script -->
   <script>
     function calculateDaysUntil(targetDate) {
@@ -203,6 +242,11 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
+    
+    document.getElementById('egg1').addEventListener('click', () => {
+
+    })
+
     // Firebase Firestore function to fetch latest news
     async function fetchLatestNews() {
       const db = getFirestore(app);
@@ -230,11 +274,11 @@
         <small class="text-muted">${humanReadableTimestamp}</small>
       `;
         } else {
-          document.getElementById('latest-news').innerHTML = '<p class="text-muted">No news available</p>';
+          document.getElementById('latest-news').innerHTML = `<p class="text-muted">Na minchia</p>`;
         }
       } catch (error) {
         console.error("Error fetching the latest news:", error);
-        document.getElementById('latest-news').innerHTML = '<p class="text-muted">Failed to load news</p>';
+        document.getElementById('latest-news').innerHTML = '<p class="text-muted">Erore nel caricamento news</p>';
       }
     }
 

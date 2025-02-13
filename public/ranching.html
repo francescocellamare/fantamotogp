@@ -40,15 +40,17 @@
 
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-dark bg-dark border-bottom">
-        <div class="container-fluid">
+    <nav class="navbar navbar-dark bg-dark border-bottom py-3">
+        <div class="container-fluid d-flex align-items-center">
             <a class="navbar-brand d-flex align-items-center" href="dashboard.html">
                 <img src="./assets/logo.png" alt="Logo" class="logo me-2" style="width: 40px; height: auto;">
-                <span>FantaMotoGP</span>
+                <span class="fw-bold text-white">FantaMotoGP</span>
             </a>
-            <button class="btn btn-secondary" id="logout">
-                <i class="fa-solid fa-right-from-bracket"></i> Logout
-            </button>
+            <div class="ms-auto d-flex align-items-center gap-2">
+                <button class="btn btn-secondary" id="logout">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+            </div>
         </div>
     </nav>
 
@@ -137,6 +139,11 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = "index.html";
+            }
+        })
         // Logout
         document.getElementById('logout').addEventListener('click', () => {
             signOut(auth)
@@ -234,6 +241,51 @@
                 saveModal.show(); // Show the modal
             });
 
+            async function updateUserPointsAndSchedina(sortedRiders) {
+                try {
+                    // Fetch all users
+                    const usersRef = collection(db, 'users');
+                    const userSnap = await getDocs(usersRef);
+
+                    if (userSnap.empty) {
+                        console.warn("Users not found");
+                        return;
+                    }
+
+                    // Assuming sortedRiders is already defined and contains the sorted riders list
+                    for (const userDoc of userSnap.docs) {
+                        const userData = userDoc.data();
+                        let points = userData.points || 0; // Initialize points, default to 0 if not set
+                        console.log(userData)
+
+                        if (userData.schedina != undefined && Object.values(userData.schedina).length > 0) {
+                            console.log('utente con schedina')
+
+                            // Check if the user's schedina matches the top 3 riders
+                            if (
+                                userData.schedina['1'] === sortedRiders[0].id &&
+                                userData.schedina['2'] === sortedRiders[1].id &&
+                                userData.schedina['3'] === sortedRiders[2].id
+                            ) {
+                                points += 1; // Increment points if the top 3 riders match
+                            }
+                        }
+                        else {
+                            console.log('utente senza schedina')
+                        }
+
+                        // Update the user document with new points and clear the schedina
+                        const singleUserRef = doc(db, 'users', userDoc.id); // Use userDoc.id to get the user document reference
+                        await updateDoc(singleUserRef, {
+                            points: points,
+                            schedina: {} // Reset schedina if that's the desired behavior
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error updating users' points and schedina:", error);
+                }
+            }
+
             // Handle the confirm save action in the modal
             document.getElementById('confirmSaveBtn').addEventListener('click', async () => {
                 const selectedCircuitOption = document.getElementById('circuitSelect').selectedOptions[0];
@@ -256,6 +308,8 @@
                     id: item.dataset.id,
                     position: index + 1 // 1-based ranking
                 }));
+
+                await updateUserPointsAndSchedina(sortedRiders)
 
                 // Save updated ranking to Firestore
                 try {
@@ -372,7 +426,7 @@
                             }
                         }
 
-                        const teamRef = doc(db, 'Teams', squadData.team)
+                        const teamRef = doc(db, 'Teams', squadData.team.toString())
                         const teamSnap = await getDoc(teamRef);
 
                         // If rider exists, add their points to the squad's total
@@ -383,7 +437,7 @@
                             console.warn(`Team with ID ${teamId} not found.`);
                         }
                         // Define the reference to the squad document to update it
-                        const squadRef = doc(db, 'squads', squadDoc.id); // Use the squad's doc id to get the reference
+                        const squadRef = doc(db, 'squads', squadDoc.id.toString()); // Use the squad's doc id to get the reference
 
                         // Update the squad with the new total points
                         await updateDoc(squadRef, {

@@ -7,6 +7,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Quill Editor -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <style>
         body {
             background-color: #f8f9fa;
@@ -35,20 +37,26 @@
         .btn-remove:hover {
             background-color: #c82333;
         }
+
+        .quill-editor {
+            height: 300px;
+        }
     </style>
 </head>
 
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-dark bg-dark border-bottom">
-        <div class="container-fluid">
+    <nav class="navbar navbar-dark bg-dark border-bottom py-3">
+        <div class="container-fluid d-flex align-items-center">
             <a class="navbar-brand d-flex align-items-center" href="dashboard.html">
                 <img src="./assets/logo.png" alt="Logo" class="logo me-2" style="width: 40px; height: auto;">
-                <span>FantaMotoGP</span>
+                <span class="fw-bold text-white">FantaMotoGP</span>
             </a>
-            <button class="btn btn-secondary" id="logout">
-                <i class="fa-solid fa-right-from-bracket"></i> Logout
-            </button>
+            <div class="ms-auto d-flex align-items-center gap-2">
+                <button class="btn btn-secondary" id="logout">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+            </div>
         </div>
     </nav>
 
@@ -63,8 +71,19 @@
                 <div id="title-error" class="text-danger mt-2" style="display: none;">Titolo è obbligatorio</div>
             </div>
             <div class="mb-3">
-                <label for="newsRecap" class="form-label">Body</label>
-                <textarea class="form-control" id="newsRecap" rows="3" placeholder="Inserisci un riepilogo"></textarea>
+                <label for="newsTag" class="form-label">Tag</label>
+                <select class="form-control" id="newsTag">
+                    <option value="">Seleziona un tag</option>
+                    <option value="Avviso">Avviso</option>
+                    <option value="Flame">Flame</option>
+                    <option value="Alert">Alert</option>
+                </select>
+                <div id="tag-error" class="text-danger mt-2" style="display: none;">Tag è obbligatorio</div>
+            </div>
+            <div class="mb-3">
+                <label for="newsBody" class="form-label">Body</label>
+                <!-- Quill Editor -->
+                <div id="newsBody" class="quill-editor"></div>
                 <div id="recap-error" class="text-danger mt-2" style="display: none;">Riepilogo è obbligatorio</div>
             </div>
             <button class="btn btn-primary" id="publishNewsBtn">Pubblica</button>
@@ -97,12 +116,15 @@
             </div>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 
+
+    <!-- Firebase and Quill Editor Scripts -->
     <script type="module">
-        // Firebase imports and configuration
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, doc, getDoc, setDoc, query, where } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        import { getFirestore, collection, setDoc, doc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        // Quill Editor
 
         const firebaseConfig = {
             apiKey: "AIzaSyDlLVyt-XFNbnnwtkpbpO7MbfcEczBFPXM",
@@ -119,31 +141,54 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = "index.html";
+            }
+        })
+        // Initialize Quill Editor
+        const quill = new Quill('#newsBody', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ 'header': '1' }, { 'header': '2' }],
+                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                    ['bold', 'italic', 'underline'],
+                ]
+            }
+        });
+
         async function publishNews() {
             const newsCollection = collection(db, 'news');
             const title = document.getElementById('newsTitle').value;
-            const recap = document.getElementById('newsRecap').value;
+            const htmlContent = quill.root.innerHTML;  // Get HTML content from Quill
+            const tag = document.getElementById('newsTag').value
+
+            // Convert HTML to Markdown
+            const markdownContent = htmlToMarkdown(htmlContent);
 
             // Reset errors
             document.getElementById('title-error').style.display = 'none';
             document.getElementById('recap-error').style.display = 'none';
+            document.getElementById('tag-error').style.display = 'none'
 
             // Validate inputs
             if (!title) {
                 document.getElementById('title-error').style.display = 'block';
                 return;
             }
-            if (!recap) {
+            if (!markdownContent.trim()) {  // Ensure there's actual text (not just empty or whitespace)
                 document.getElementById('recap-error').style.display = 'block';
                 return;
             }
 
             try {
-                // Add news to Firestore
+                // Add news to Firestore (with Markdown content)
                 await setDoc(doc(newsCollection), {
                     title: title,
-                    recap: recap,
-                    timestamp: new Date()
+                    recap: markdownContent,
+                    timestamp: new Date(),
+                    tag: tag
                 });
 
                 // Show success toast
@@ -155,7 +200,7 @@
 
                 // Clear the inputs after successful submission
                 document.getElementById('newsTitle').value = '';
-                document.getElementById('newsRecap').value = '';
+                quill.root.innerHTML = '';
 
             } catch (error) {
                 console.error("Error publishing news:", error);
@@ -167,12 +212,60 @@
             }
         }
 
+        // Function to convert HTML to Markdown
+        function htmlToMarkdown(html) {
+            let markdown = html;
+
+            // Replace headings with Markdown syntax and ensure spacing between them
+            markdown = markdown.replace(/<h1>(.*?)<\/h1>/g, '# $1\n\n');
+            markdown = markdown.replace(/<h2>(.*?)<\/h2>/g, '## $1\n\n');
+            markdown = markdown.replace(/<h3>(.*?)<\/h3>/g, '### $1\n\n');
+            markdown = markdown.replace(/<h4>(.*?)<\/h4>/g, '#### $1\n\n');
+            markdown = markdown.replace(/<h5>(.*?)<\/h5>/g, '##### $1\n\n');
+            markdown = markdown.replace(/<h6>(.*?)<\/h6>/g, '###### $1\n\n');
+
+            // Replace bold, italic, and underline with Markdown syntax
+            markdown = markdown.replace(/<b>(.*?)<\/b>/g, '**$1**');
+            markdown = markdown.replace(/<strong>(.*?)<\/strong>/g, '**$1**');
+            markdown = markdown.replace(/<i>(.*?)<\/i>/g, '*$1*');
+            markdown = markdown.replace(/<em>(.*?)<\/em>/g, '*$1*');
+            markdown = markdown.replace(/<u>(.*?)<\/u>/g, '$1');  // Remove underline, as it's not in markdown
+
+            // Replace lists with Markdown syntax and ensure line breaks
+            markdown = markdown.replace(/<ul>/g, '').replace(/<\/ul>/g, '');
+            markdown = markdown.replace(/<ol>/g, '').replace(/<\/ol>/g, '');
+            markdown = markdown.replace(/<li>(.*?)<\/li>/g, '- $1\n');
+
+            // Replace links with Markdown syntax
+            markdown = markdown.replace(/<a href="(.*?)">(.*?)<\/a>/g, '[$2]($1)');
+
+            // Handle <br> tags to preserve line breaks
+            markdown = markdown.replace(/<br\s*\/?>/g, '\n');
+
+            // Remove images (we're not exporting them)
+            markdown = markdown.replace(/<img[^>]*>/g, '');
+
+            // Ensure line breaks after paragraphs
+            markdown = markdown.replace(/<\/p>/g, '\n\n');
+            markdown = markdown.replace(/<p>/g, '');
+
+            // Remove any other tags (e.g., font sizes, colors)
+            markdown = markdown.replace(/<.*?>/g, '');
+
+            // Ensure that multiple newlines are reduced to a single newline to prevent excessive empty lines
+            markdown = markdown.replace(/\n+/g, '\n');
+
+            return markdown.trim();
+        }
+
         document.getElementById('publishNewsBtn').addEventListener('click', publishNews);
     </script>
 
+    <!-- Bootstrap and Quill Editor Script -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 </body>
 
 </html>

@@ -77,7 +77,59 @@
         .sort-container {
             margin-bottom: 20px;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
+            /* Centers the items horizontally */
+            width: 100%;
+            /* Make the container take the full available width */
+        }
+
+        .dropdown {
+            width: 100%;
+            /* Make the dropdown take the full width of the container */
+            max-width: 300px;
+            /* Limit the maximum width of the dropdown (optional) */
+        }
+
+        .btn {
+            width: 100%;
+            /* Make the button inside the dropdown take the full width */
+            padding: 8px 16px;
+            /* Adjust padding as needed */
+        }
+
+        #loadingSpinner {
+            position: absolute;
+            /* Absolute positioning */
+            top: 50%;
+            /* Center vertically */
+            left: 50%;
+            /* Center horizontally */
+            z-index: 1050;
+            /* Ensure it's above other elements */
+            display: block;
+            width: 3rem;
+            height: 3rem;
+            margin-left: -1.5rem;
+            /* Half the width of the spinner to adjust the centering */
+            margin-top: -1.5rem;
+            /* Half the height of the spinner to adjust the centering */
+        }
+
+        /* Overlay styling */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            /* Semi-transparent black */
+            z-index: 1040;
+            /* Just below the spinner */
+            display: none;
+            /* Initially hidden */
+            pointer-events: none;
+            /* Disable interactions */
         }
     </style>
 </head>
@@ -86,7 +138,7 @@
     <!-- Navbar -->
     <nav class="navbar navbar-dark bg-dark border-bottom py-3">
         <div class="container-fluid d-flex align-items-center">
-            <a class="navbar-brand d-flex align-items-center" href="#">
+            <a class="navbar-brand d-flex align-items-center" href="dashboard.html">
                 <img src="./assets/logo.png" alt="Logo" class="logo me-2" style="width: 40px; height: auto;">
                 <span class="fw-bold text-white">FantaMotoGP</span>
             </a>
@@ -103,34 +155,37 @@
 
 
     <div class="container mt-5">
+        <div id="loadingSpinner" class="spinner-border" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
         <!-- Sorting controls -->
-        <div class="sort-container">
+        <div class="sort-container" id="sortid">
             <div class="dropdown">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="sortDropdown"
                     data-bs-toggle="dropdown" aria-expanded="false">
-                    Sort By
+                    Ordina per
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="sortDropdown">
-                    <li><a class="dropdown-item" href="#" id="sortByName">Name</a></li>
-                    <li><a class="dropdown-item" href="#" id="sortByPoints">Points</a></li>
+                    <li><a class="dropdown-item" href="#" id="sortByName">Nome</a></li>
+                    <li><a class="dropdown-item" href="#" id="sortByPoints">Punti</a></li>
                 </ul>
             </div>
         </div>
 
         <div id="rider-info" class="text-center">
-            <h2>Loading rider(s)...</h2>
         </div>
+
 
         <!-- Table Container (will be displayed on mobile) -->
         <div id="table-container" class="mt-4" style="display: none;">
             <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>Race</th>
-                        <th>Score Points</th>
-                        <th>Sprint Points</th>
-                        <th>Bonus Points</th>
-                        <th>Total Points</th>
+                        <th>Gara</th>
+                        <th>Posizione</th>
+                        <th>Sprint</th>
+                        <th>Bonus</th>
+                        <th>Totale</th>
                     </tr>
                 </thead>
                 <tbody id="table-body">
@@ -156,11 +211,26 @@
         </div>
 
     </div>
+    <!-- Toast for Errors -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="error-toast" class="toast bg-danger text-white" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-danger text-white">
+                <strong class="me-auto">Error</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+            </div>
+            <div id="toast-error-body" class="toast-body">
+                Something went wrong.
+            </div>
+        </div>
+    </div>
 
+    <div id="overlay" class="overlay"></div>
     <script type="module">
         // Import Firebase SDKs
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -175,44 +245,58 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        document.getElementById('overlay').style.display = 'block';
 
         // Get rider ID from URL
         const urlParams = new URLSearchParams(window.location.search);
         const riderId = urlParams.get("id");
 
+        function showErrorToast(message) {
+            const toastBody = document.getElementById('toast-error-body');
+            toastBody.innerHTML = message;
+            const toast = new bootstrap.Toast(document.getElementById('error-toast'));
+            toast.show();
+        }
+
         async function fetchRider(riderId) {
-            const riderRef = doc(db, "riders", riderId);
-            const riderSnap = await getDoc(riderRef);
+            try {
+                const riderRef = doc(db, "riders", riderId);
+                const riderSnap = await getDoc(riderRef);
 
-            if (!riderSnap.exists()) {
-                document.getElementById("rider-info").innerHTML = "<h3>Rider not found.</h3>";
-                return;
-            }
-
-            const rider = riderSnap.data();
-            console.log(rider.performance)
-            let teamName = "Unknown Team";
-            if (rider.team) {
-                const teamRef = doc(db, "Teams", rider.team.toString());
-                const teamSnap = await getDoc(teamRef);
-                if (teamSnap.exists()) {
-                    teamName = teamSnap.data().name || "Unknown Team";
+                if (!riderSnap.exists()) {
+                    document.getElementById("rider-info").innerHTML = "<h3>Rider non trovato.</h3>";
+                    return;
                 }
-            }
 
-            document.getElementById("rider-info").innerHTML = `
-                <div class="card mx-auto" style="width: 24rem;">
-                    <img src="${rider.image || 'https://via.placeholder.com/150'}" class="card-img-top" alt="${rider.name}">
-                    <div class="card-body">
-                        <h4 class="card-title">${rider.name}</h4>
-                        <p class="card-text">🏍 Team: <strong>${teamName}</strong></p>
-                        <p class="card-text">⭐ Punti: <strong>${rider.points || 0}</strong></p>
-                    </div>
+                const rider = riderSnap.data();
+                console.log(rider.performance);
+                let teamName = "Team sconosciuto";
+                if (rider.team) {
+                    const teamRef = doc(db, "Teams", rider.team.toString());
+                    const teamSnap = await getDoc(teamRef);
+                    if (teamSnap.exists()) {
+                        teamName = teamSnap.data().name || "Team sconosciuto";
+                    }
+                }
+
+                document.getElementById("rider-info").innerHTML = `
+            <div class="card mx-auto" style="width: 24rem;">
+                <div class="card-body">
+                    <h4 class="card-title">${rider.name}</h4>
+                    <p class="card-text">Team: <strong>${teamName}</strong></p>
+                    <p class="card-text">Punti: <strong>${rider.points || 0}</strong></p>
                 </div>
-            `;
+            </div>
+        `;
 
-            // Example of creating a chart with rider's data (use your own data for real application)
-            createCharts(rider.performance || 0);
+                createCharts(rider.performance || 0);
+
+            } catch (error) {
+                console.error("Errore nel recupero del pilota:", error);
+                showErrorToast("Si è verificato un errore durante il caricamento dei dati del pilota.");
+            }
         }
 
         function createCharts(points) {
@@ -354,30 +438,36 @@
 
         let riders = [];
         async function fetchAllRiders() {
-            const ridersRef = collection(db, "riders");
-            const ridersSnap = await getDocs(ridersRef);
-            riders = [];
-            // Use for...of loop to handle async operations properly
-            for (const docSnap of ridersSnap.docs) {
-                const rider = docSnap.data();
-                let teamName = "Unknown Team";
-                if (rider.team) {
-                    const teamRef = doc(db, "Teams", rider.team.toString());
-                    const teamSnap = await getDoc(teamRef);
-                    if (teamSnap.exists()) {
-                        teamName = teamSnap.data().name || "Unknown Team";
-                    }
-                }
-                riders.push({
-                    id: docSnap.id,
-                    name: rider.name,
-                    points: rider.points || 0,
-                    team: teamName,
-                    image: rider.image || 'https://via.placeholder.com/150'
-                });
-            }
+            try {
+                const ridersRef = collection(db, "riders");
+                const ridersSnap = await getDocs(ridersRef);
+                riders = [];
 
-            renderRiders(riders);
+                for (const docSnap of ridersSnap.docs) {
+                    const rider = docSnap.data();
+                    let teamName = "Team sconosciuto";
+                    if (rider.team) {
+                        const teamRef = doc(db, "Teams", rider.team.toString());
+                        const teamSnap = await getDoc(teamRef);
+                        if (teamSnap.exists()) {
+                            teamName = teamSnap.data().name || "Team sconosciuto";
+                        }
+                    }
+                    riders.push({
+                        id: docSnap.id,
+                        name: rider.name,
+                        points: rider.points || 0,
+                        team: teamName,
+                        image: rider.image || 'https://via.placeholder.com/150'
+                    });
+                }
+
+                renderRiders(riders);
+
+            } catch (error) {
+                console.error("Errore nel recupero dei piloti:", error);
+                showErrorToast("Si è verificato un errore durante il caricamento dei piloti.");
+            }
         }
 
         function renderRiders(riders) {
@@ -386,11 +476,10 @@
             riders.forEach((rider) => {
                 content += `
                     <div class="card rider-card" data-id="${rider.id}" style="width: 18rem; cursor: pointer;">
-                        <img src="${rider.image}" class="card-img-top" alt="${rider.name}">
                         <div class="card-body">
                             <h4 class="card-title">${rider.name}</h4>
-                            <p class="card-text">🏍 Team: <strong>${rider.team}</strong></p>
-                            <p class="card-text">⭐ Punti: <strong>${rider.points}</strong></p>
+                            <p class="card-text">Team: <strong>${rider.team}</strong></p>
+                            <p class="card-text">Punti: <strong>${rider.points}</strong></p>
                         </div>
                     </div>
                 `;
@@ -425,9 +514,20 @@
         });
 
         if (riderId) {
-            fetchRider(riderId);
+            document.getElementById('sortid').style.display = 'none'
+            document.getElementById('loadingSpinner').style.display = 'flex';
+            await fetchRider(riderId);
+            document.getElementById('overlay').style.display = 'none'; // Hide overlay
+
+            document.getElementById('loadingSpinner').style.display = 'none';
         } else {
-            fetchAllRiders();
+            document.getElementById('overlay').style.display = 'block'; // Hide overlay
+
+            document.getElementById('loadingSpinner').style.display = 'flex';
+            await fetchAllRiders();
+
+            document.getElementById('loadingSpinner').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none'; // Hide overlay
         }
 
         // Logout

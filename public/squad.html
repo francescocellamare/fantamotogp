@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Squad</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPeISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+        }
+
+        .list-group-item {
+            border: none;
+        }
+
+        .list-group-item:nth-child(even) {
+            background-color: #f1f3f5;
+        }
+
+        .list-group-item:nth-child(odd) {
+            background-color: #e9ecef;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+        }
+
+        footer {
+            background-color: #343a40;
+            color: #ffffff;
+            padding: 10px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark bg-dark border-bottom py-3">
+        <div class="container-fluid d-flex align-items-center">
+            <a class="navbar-brand d-flex align-items-center" href="dashboard.html">
+                <img src="./assets/logo.png" alt="Logo" class="logo me-2" style="width: 40px; height: auto;">
+                <span class="fw-bold text-white">FantaMotoGP</span>
+            </a>
+            <div class="ms-auto d-flex align-items-center gap-2">
+                <button class="btn btn-secondary d-none" id="console">
+                    <i class="fa-solid fa-tools"></i> Console
+                </button>
+                <button class="btn btn-secondary" id="logout">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+
+    <!-- Main Content -->
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header text-center bg-secondary text-white">
+                        <h2 id="squadName">Caricamento...</h2>
+                    </div>
+                    <div class="card-body">
+                        <p class="h5"><strong>Punti:</strong> <span id="squadPoints">-</span></p>
+                        <p class="h5"><strong>Team:</strong> <span id="teamName">Caricamento...</span></p>
+
+                        <h4 class="mt-4">Piloti</h4>
+                        <ul id="ridersList" class="list-group">
+                            <li class="list-group-item">Caricamento...</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+    // Import Firebase SDKs
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+    import { getFirestore, collection, getDocs, doc, getDoc, setDoc, query, where } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlLVyt-XFNbnnwtkpbpO7MbfcEczBFPXM",
+            authDomain: "fantamotogp-e46cd.firebaseapp.com",
+            projectId: "fantamotogp-e46cd",
+            storageBucket: "fantamotogp-e46cd.firebasestorage.app",
+            messagingSenderId: "1082694838160",
+            appId: "1:1082694838160:web:637714386327bcc8027515"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Function to get URL parameters
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // Fetch and display squad details
+        async function fetchSquadDetails() {
+            const squadId = getQueryParam("id");
+            if (!squadId) {
+                console.error("Squad ID not found in URL.");
+                return;
+            }
+
+            try {
+                // Fetch squad data
+                const squadRef = doc(db, "squads", squadId.toString());
+                const squadDoc = await getDoc(squadRef);
+
+                if (!squadDoc.exists()) {
+                    console.error("Squad not found.");
+                    document.getElementById("squadName").textContent = "Squad Not Found";
+                    return;
+                }
+
+                const squadData = squadDoc.data();
+                document.getElementById("squadName").textContent = squadData.name;
+                document.getElementById("squadPoints").textContent = squadData.points || 0;
+
+                // Fetch team name
+                if (squadData.team) {
+                    const teamRef = doc(db, "Teams", squadData.team.toString());
+                    const teamDoc = await getDoc(teamRef);
+                    document.getElementById("teamName").textContent = teamDoc.exists() ? teamDoc.data().name : "Unknown Team";
+                }
+
+                // Fetch riders details
+                const ridersList = document.getElementById("ridersList");
+                ridersList.innerHTML = ""; // Clear list
+
+                if (squadData.riders && squadData.riders.length > 0) {
+                    const riderPromises = squadData.riders.map(async (riderId) => {
+                        const riderRef = doc(db, "riders", riderId.toString());
+                        const riderDoc = await getDoc(riderRef);
+                        if (riderDoc.exists()) {
+                            const li = document.createElement("li");
+                            li.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
+                            li.innerHTML = `${riderDoc.data().name} <span class="badge bg-primary">${riderDoc.data().points || 0} pts</span>`;
+                            ridersList.appendChild(li);
+                        }
+                    });
+
+                    await Promise.all(riderPromises);
+                } else {
+                    ridersList.innerHTML = '<li class="list-group-item">No riders in this squad.</li>';
+                }
+
+            } catch (error) {
+                console.error("Error fetching squad details:", error);
+            }
+        }
+
+        // Call function on page load
+        fetchSquadDetails();
+
+        // Logout
+        document.getElementById('logout').addEventListener('click', () => {
+            signOut(auth)
+                .then(() => {
+                    window.location.href = "index.html"; // Redirect to login page
+                })
+                .catch((error) => console.error("Error logging out:", error));
+        });
+
+    </script>
+</body>
+
+</html>

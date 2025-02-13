@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar navbar-dark bg-dark border-bottom py-3">
+        <div class="container-fluid d-flex align-items-center">
+            <a class="navbar-brand d-flex align-items-center" href="dashboard.html">
+                <img src="./assets/logo.png" alt="Logo" class="logo me-2" style="width: 40px; height: auto;">
+                <span class="fw-bold text-white">FantaMotoGP</span>
+            </a>
+            <div class="ms-auto d-flex align-items-center gap-2">
+                <button class="btn btn-secondary d-none" id="console">
+                    <i class="fa-solid fa-tools"></i> Console
+                </button>
+                <button class="btn btn-secondary" id="logout">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <h2 class="text-center">Select Top 3 for Next Race</h2>
+        <div class="card p-4 mt-3">
+            <div class="mb-3">
+                <label class="form-label">1st Place</label>
+                <select id="firstPlace" class="form-select rider-select">
+                    <option value="">Select a rider</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">2nd Place</label>
+                <select id="secondPlace" class="form-select rider-select">
+                    <option value="">Select a rider</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">3rd Place</label>
+                <select id="thirdPlace" class="form-select rider-select">
+                    <option value="">Select a rider</option>
+                </select>
+            </div>
+            <button id="submitResults" class="btn btn-primary w-100">Submit Prediction</button>
+        </div>
+
+        <!-- Toasts Container (Position Fixed) -->
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050;">
+            <!-- Error Toast -->
+            <div id="error-toast" class="toast align-items-center text-white bg-danger border-0" role="alert"
+                aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+                <div class="d-flex">
+                    <div class="toast-body" id="toast-error-body">Something went wrong.</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+                </div>
+            </div>
+
+            <!-- Success Toast -->
+            <div id="success-toast" class="toast text-bg-success border-0" role="alert" aria-live="assertive"
+                aria-atomic="true" data-bs-delay="5000">
+                <div class="toast-header bg-success text-white">
+                    <strong class="me-auto">Troppo forte</strong>
+                    <small class="text-light">proprio mo</small>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+                </div>
+                <div class="toast-body" id="toast-success-body"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlLVyt-XFNbnnwtkpbpO7MbfcEczBFPXM",
+            authDomain: "fantamotogp-e46cd.firebaseapp.com",
+            projectId: "fantamotogp-e46cd",
+            storageBucket: "fantamotogp-e46cd.firebasestorage.app",
+            messagingSenderId: "1082694838160",
+            appId: "1:1082694838160:web:637714386327bcc8027515",
+            measurementId: "G-LSRZLRP39Z"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = "index.html";
+            }
+        })
+        async function loadRiders() {
+            const ridersDropdowns = document.querySelectorAll('.rider-select');
+            const ridersSnapshot = await getDocs(collection(db, "riders"));
+            const riders = ridersSnapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name }));
+
+            ridersDropdowns.forEach(select => {
+                riders.forEach(rider => {
+                    const option = document.createElement('option');
+                    option.value = rider.id;
+                    option.textContent = rider.name;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        async function updateUserPointsAndSchedina(sortedRiders) {
+            try {
+                // Fetch all users
+                const usersRef = collection(db, 'users');
+                const userSnap = await getDocs(usersRef);
+
+                if (userSnap.empty) {
+                    console.warn("Users not found");
+                    return;
+                }
+
+                // Process each user
+                for (const userDoc of userSnap.docs) {
+                    const userData = userDoc.data();
+                    let points = userData.points || 0;
+
+                    if (userData.schedina != undefined && Object.values(userData.schedina).length > 0) {
+                        // Check if the user's schedina matches the top 3 riders
+                        if (
+                            userData.schedina['1'] === sortedRiders[0].id &&
+                            userData.schedina['2'] === sortedRiders[1].id &&
+                            userData.schedina['3'] === sortedRiders[2].id
+                        ) {
+                            points += 1; // Increment points if the top 3 riders match
+                        }
+                    }
+
+                    // Update the user document with new points and reset the schedina
+                    const singleUserRef = doc(db, 'users', userDoc.id); // Use userDoc.id to get the user document reference
+                    await updateDoc(singleUserRef, {
+                        points: points,
+                        schedina: {} // Reset schedina if desired
+                    });
+                }
+            } catch (error) {
+                console.error("Error updating users' points and schedina:", error);
+            }
+        }
+
+
+
+        document.getElementById('submitResults').addEventListener('click', async () => {
+            const first = document.getElementById('firstPlace').value;
+            const second = document.getElementById('secondPlace').value;
+            const third = document.getElementById('thirdPlace').value;
+
+            if (!first || !second || !third) {
+                const errorToastEl = document.getElementById('error-toast');
+                const errorToastBody = document.getElementById('toast-error-body');
+                errorToastBody.textContent = `Errore: manca qualcuno`;
+                const errorToast = new bootstrap.Toast(errorToastEl);
+                errorToast.show();
+                return;
+            }
+
+            const schedina = [{
+                id: first
+            }, {
+                id: second
+            }, {
+                id: third
+            }]
+
+            await updateUserPointsAndSchedina(schedina)
+
+            const successToastEl = document.getElementById('success-toast');
+            const successToastBody = document.getElementById('toast-success-body');
+            successToastBody.textContent = 'E anche oggi siamo ludopatici';
+            const successToast = new bootstrap.Toast(successToastEl);
+            successToast.show();
+
+        });
+
+        onAuthStateChanged(auth, (user) => {
+            loadRiders();
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
